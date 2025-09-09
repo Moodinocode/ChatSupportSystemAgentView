@@ -1,0 +1,217 @@
+import React, { useState, useEffect } from 'react';
+import { TicketList } from '../Components/TicketList';
+import ChatInterface from '../Components/ChatInterface';
+import TicketDetails from '../Components/TicketDetails';
+import TicketDashboard from '../Components/TicketDashboard';
+import AssignmentPanel from '../Components/AssignmentPanel';
+import { LayoutDashboard, Users, MessageSquare } from "lucide-react";
+import { mockMessages } from '../assets/mockdata';
+import useTicketStore from '../Stores/useTicketStore';
+
+const TicketsViewPage = () => {
+  const [viewMode, setViewMode] = useState("dashboard");
+  
+  // Zustand store
+  const {
+    tickets,
+    selectedTicket,
+    currentAgent,
+    loading,
+    error,
+    fetchTickets,
+    setSelectedTicket,
+    getTicketById,
+    handleTakeTicket,
+    handleAssignTicket,
+    handleResolveTicket,
+    handleReopenTicket,
+    handleBulkAssignTickets,
+    getTicketStats,
+    clearError
+  } = useTicketStore();
+
+  console.log("Tickets from store:", tickets);
+
+  // Get selected ticket data
+  const selectedTicketData = selectedTicket ? getTicketById(selectedTicket) : null;
+  const messages = selectedTicket ? mockMessages[selectedTicket] || [] : [];
+
+  // Fetch tickets on component mount
+  useEffect(() => {
+    fetchTickets().then(() => {
+      console.log("Fetched tickets:", tickets)
+      });
+  }, [fetchTickets]);
+
+  // Show error toast/notification
+  useEffect(() => {
+    if (error) {
+      alert(error); // Replace with your preferred notification system
+      clearError();
+    }
+  }, [error, clearError]);
+
+  const handleTicketSelect = (ticketId) => {
+    setSelectedTicket(ticketId);
+    setViewMode("chat");
+  };
+
+  const handleSendMessage = (content) => {
+    console.log("Sending message:", content);
+    // Toast notification would go here
+    alert("Message sent to customer");
+  };
+
+  const onTakeTicket = async () => {
+    if (selectedTicketData) {
+      const result = await handleTakeTicket(selectedTicket);
+      if (result.success) {
+        alert(result.message);
+      }
+    }
+  };
+
+  const onAssignTicket = () => {
+    alert("Assignment feature would open here");
+    // You could implement a modal or dropdown for agent selection
+  };
+
+  const onResolveTicket = async () => {
+    if (selectedTicketData) {
+      const result = await handleResolveTicket(selectedTicket);
+      if (result.success) {
+        alert(result.message);
+      }
+    }
+  };
+
+  const onReopenTicket = async () => {
+    if (selectedTicketData) {
+      const result = await handleReopenTicket(selectedTicket);
+      if (result.success) {
+        alert(result.message);
+      }
+    }
+  };
+
+  const handleAssignTickets = async (ticketIds, agentId) => {
+    const result = await handleBulkAssignTickets(ticketIds, agentId);
+    if (result.success) {
+      alert(result.message);
+    }
+  };
+
+  const handleBulkAssign = (assignments) => {
+    console.log("Bulk assign:", assignments);
+    alert("Tickets assigned successfully");
+  };
+
+  // Show loading spinner
+  if (loading && tickets.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg"></div>
+          <p className="mt-2 text-gray-600">Loading tickets...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen bg-base-100 flex">
+      {/* Navigation Header */}
+      <div className="absolute top-0 left-0 right-0 z-10 bg-base-100 border-b p-2">
+        <div className="flex items-center gap-2">
+          <button
+            className={`btn btn-sm ${viewMode === "dashboard" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setViewMode("dashboard")}
+          >
+            <LayoutDashboard className="w-4 h-4 mr-2" />
+            Dashboard
+          </button>
+          <button
+            className={`btn btn-sm ${viewMode === "assignment" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setViewMode("assignment")}
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Assignment
+          </button>
+          <button
+            className={`btn btn-sm ${viewMode === "chat" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setViewMode("chat")}
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Chat
+          </button>
+          
+          {/* Loading indicator in header */}
+          {loading && (
+            <div className="flex items-center gap-2 ml-auto">
+              <div className="loading loading-spinner loading-sm"></div>
+              <span className="text-sm text-gray-600">Updating...</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex w-full pt-14">
+        {/* Ticket List - Always visible */}
+        <TicketList 
+          tickets={tickets}
+          selectedTicket={selectedTicket}
+          onTicketSelect={handleTicketSelect}
+        />
+        
+        {/* Main Content Area */}
+        {viewMode === "dashboard" && (
+          <TicketDashboard 
+            tickets={tickets} 
+            currentAgent={currentAgent} 
+            stats={getTicketStats()} // Pass pre-calculated stats
+          />
+        )}
+
+        {viewMode === "assignment" && (
+          <AssignmentPanel 
+            tickets={tickets}
+            onAssignTickets={handleAssignTickets}
+            onBulkAssign={handleBulkAssign}
+          />
+        )}
+
+        {viewMode === "chat" && selectedTicketData ? (
+          <>
+            <ChatInterface 
+              ticket={selectedTicketData}
+              messages={messages}
+              onSendMessage={handleSendMessage}
+            />
+            <TicketDetails 
+              ticket={selectedTicketData}
+              currentAgent={currentAgent}
+              onTakeTicket={onTakeTicket}
+              onAssignTicket={onAssignTicket}
+              onResolveTicket={onResolveTicket}
+              onReopenTicket={onReopenTicket}
+            />
+          </>
+        ) : viewMode === "chat" && !selectedTicketData ? (
+          <div className="flex-1 flex items-center justify-center bg-base-200/20">
+            <div className="text-center">
+              <MessageSquare className="w-12 h-12 text-base-content/70 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-base-content/70 mb-2">
+                Select a ticket to start chatting
+              </h3>
+              <p className="text-sm text-base-content/70">
+                Choose a ticket from the queue to view conversation history
+              </p>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+export default TicketsViewPage;
