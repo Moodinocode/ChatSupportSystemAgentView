@@ -1,25 +1,23 @@
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useState } from "react";
 import Badge from "./UIHelpers/Badge.jsx";
 import { Card } from "./UIHelpers/Card.jsx";
 import { ScrollArea } from "./UIHelpers/ScrollArea.jsx";
 import { Clock, User, AlertTriangle } from "lucide-react";
 
+dayjs.extend(relativeTime);
+
 export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
   const [filter, setFilter] = useState("all");
 
   const statusConfig = {
-    open: { color: "bg-primary text-primary-foreground", label: "Open" },
+    open: { color: "bg-primary  text-white", label: "Open" },
     pending: { color: "bg-warning text-warning-foreground", label: "Pending" },
     resolved: { color: "bg-success text-success-foreground", label: "Resolved" },
     urgent: { color: "bg-error text-error-foreground", label: "Urgent" },
   };
 
-  const priorityConfig = {
-    low: { icon: "🟢", color: "text-success" },
-    medium: { icon: "🟡", color: "text-warning" },
-    high: { icon: "🟠", color: "text-warning" },
-    urgent: { icon: "🔴", color: "text-error" },
-  };
     const filteredTickets = tickets?.filter(ticket => 
       filter === "all" ? true : ticket.status === filter
     ) || [];
@@ -36,7 +34,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
               onClick={() => setFilter(status)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 filter === status
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
@@ -46,7 +44,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
         </div>
       </div>
 
-      {/* Ticket list */}
+   
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-2">
           {filteredTickets.map(ticket => (
@@ -59,25 +57,22 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
               }`}
               onClick={() => onTicketSelect(ticket.id)}
             >
-              {/* Top row: number + status + priority */}
+      
             <div className="flex items-start justify-between mb-2">
               {(() => {
-                // Safely resolve status and priority
                 const safeStatus = statusConfig[ticket.status] || statusConfig["pending"];
-                const safePriority = priorityConfig[ticket.priority] || priorityConfig["low"];
+                
 
                 return (
                   <>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-gray-500">#{ticket.number}</span>
+                      <span className="text-xs font-mono text-gray-500">#{ticket.id}</span>
                       <Badge
                         classnames={`text-xs ${safeStatus.color}`}
                         text={safeStatus.label}
                       />
                     </div>
-                    <span className={`text-xs ${safePriority.color}`}>
-                      {safePriority.icon}
-                    </span>
+
                   </>
                 );
               })()}
@@ -100,16 +95,17 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
               <p className="text-xs text-gray-500 line-clamp-2 mb-2">{ticket.lastMessage}</p>
 
               {/* Timestamp and assigned */}
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span>{ticket.timestamp}</span>
-                </div>
-                {ticket.assignedTo && (
-                  <span className="font-medium text-primary">{ticket.assignedTo}</span>
-                )}
-              </div>
+            <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    
+                    <span>{dayjs(ticket.createdAt).fromNow()}</span>
+                  </div>
 
+                  {ticket.assignedTo && (
+                    <span className="font-medium text-primary">{ticket.assignedTo}</span>
+                  )}
+                </div>
               {/* Urgent notice */}
               {ticket.status === "urgent" && (
                 <div className="flex items-center gap-1 mt-2 text-xs text-error">

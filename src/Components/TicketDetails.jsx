@@ -21,12 +21,6 @@ const statusConfig = {
   urgent: { color: "bg-urgent text-urgent-foreground", label: "Urgent" }
 };
 
-const priorityConfig = {
-  low: { icon: "🟢", label: "Low", color: "text-success" },
-  medium: { icon: "🟡", label: "Medium", color: "text-warning" },
-  high: { icon: "🟠", label: "High", color: "text-warning" },
-  urgent: { icon: "🔴", label: "Urgent", color: "text-urgent" }
-};
 
 const TicketDetails = ({ 
   ticket, 
@@ -112,7 +106,7 @@ const TicketDetails = ({
             {(() => {
               // Safely resolve status and priority
               const safeStatus = statusConfig[ticket.status] || statusConfig["pending"];
-              const safePriority = priorityConfig[ticket.priority] || priorityConfig["low"];
+              
 
               return (
                 <>
@@ -126,26 +120,6 @@ const TicketDetails = ({
             })()}
           </div>
 
-          <div className="flex items-center justify-between">
-            {(() => {
-              const safePriority = priorityConfig[ticket.priority] || priorityConfig["low"];
-
-              return (
-                <>
-                  {/* Priority Section */}
-                  <span className="text-sm text-muted-foreground">Priority</span>
-                  <div className="flex items-center gap-1">
-                    <span className={`text-sm ${safePriority.color}`}>
-                      {safePriority.icon}
-                    </span>
-                    <span className="text-sm font-medium">
-                      {safePriority.label}
-                    </span>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
 
             
             <Separator />

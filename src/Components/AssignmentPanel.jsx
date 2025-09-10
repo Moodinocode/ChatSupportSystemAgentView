@@ -244,7 +244,7 @@ const AssignmentPanel = ({ tickets, onAssignTickets, onBulkAssign }) => {
 
                 {/* Agent Details */}
                 <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Team Status</h4>
+                  <h4 className="text-sm font-medium">Agent Status</h4>
                   {mockAgents.map((agent) => (
                     <div key={agent.id} className="flex items-center justify-between p-2 bg-base-200 rounded-md">
                       <div className="flex items-center gap-2">

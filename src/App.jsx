@@ -3,6 +3,15 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import LoginPage from "./Pages/LoginPage";
 import RegistrationPage from "./Pages/RegistrationPage";
 import TicketsViewPage from "./Pages/TicketsViewPage";
+
+
+const CatchAllRoute = () => {
+  const { user } = useContext(AuthContext);
+  return user ? <Navigate to="/" replace /> : <Navigate to="/login" replace />;
+};
+
+
+
 function App() {
 
   const router = createBrowserRouter(
@@ -11,6 +20,7 @@ function App() {
         <Route  path="login" element={<LoginPage/>} />
         <Route path="register" element={<RegistrationPage/>} />
         <Route index element={<TicketsViewPage/>} />
+        <Route path="*" element={<CatchAllRoute />} />
 
         {/* Protected section */}
         <Route element={<ProtectedRoute />}>

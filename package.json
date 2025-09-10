@@ -17,6 +17,7 @@
     "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
     "daisyui": "^5.0.54",
+    "dayjs": "^1.11.18",
     "lucide-react": "^0.542.0",
     "postcss": "^8.5.6",
     "react": "^19.1.1",

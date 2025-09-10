@@ -4,6 +4,12 @@ import { Card, CardHeader, CardContent, CardTitle } from "./UIHelpers/Card.jsx";
 import { Users, CheckCircle, AlertTriangle, TrendingUp, UserCheck } from "lucide-react";
 import useTicketStore from '../Stores/useTicketStore';
 
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+
+dayjs.extend(relativeTime);
+
 const TicketDashboard = ({ tickets = [], currentAgent, stats = {} }) => {
 
  const recentActivity = tickets
@@ -18,7 +24,7 @@ const TicketDashboard = ({ tickets = [], currentAgent, stats = {} }) => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground mb-2">Support Dashboard</h1>
-          <p className="text-muted-foreground">Overview of ticket queue and activity</p>
+          {/* <p className="text-muted-foreground">Overview of ticket queue and activity</p> */}
         </div>
 
         {/* Stats Grid */}
@@ -114,9 +120,10 @@ const TicketDashboard = ({ tickets = [], currentAgent, stats = {} }) => {
                     className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium">#{ticket.number}</p>
+                      <p className="text-sm font-medium">#{ticket.id}</p>
                       <p className="text-xs text-muted-foreground truncate">{ticket.subject}</p>
                     </div>
+                    <div className="flex flex-col items-center justify-between w-36">
                     <div className="flex items-center gap-2">
                       <Badge
                         text={ticket.status}
@@ -125,10 +132,11 @@ const TicketDashboard = ({ tickets = [], currentAgent, stats = {} }) => {
                             ? "bg-urgent text-urgent-foreground"
                             : ticket.status === "pending"
                             ? "bg-warning text-warning-foreground"
-                            : "bg-primary text-primary-foreground"
+                            : "bg-primary text-white"
                         }`}
                       />
-                      <span className="text-xs text-muted-foreground">{ticket.timestamp}</span>
+                      <span className="text-xs text-muted-foreground">{dayjs(ticket.createdAt).fromNow()}</span>
+                    </div>
                     </div>
                   </div>
                 ))}
@@ -137,7 +145,7 @@ const TicketDashboard = ({ tickets = [], currentAgent, stats = {} }) => {
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Quick Actions</CardTitle>
@@ -148,7 +156,7 @@ const TicketDashboard = ({ tickets = [], currentAgent, stats = {} }) => {
               to distribute tickets to your team.
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

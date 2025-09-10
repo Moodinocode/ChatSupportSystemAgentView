@@ -12,7 +12,7 @@ export const mockTickets = [
     assignedTo: null, // agent ID or null if unassigned
     team: "Technical Support", // or category
     twilioConversationSid: "CH1234567890abcdef",
-    createdAt: "2025-09-08T08:00:00Z",
+    createdAt: "2025-09-10T08:00:00Z",
     updatedAt: "2025-09-08T08:15:00Z"
   },
   {
