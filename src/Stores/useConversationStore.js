@@ -1,8 +1,15 @@
 // src/store/useConversationStore.js
 import { create } from "zustand";
 import { Client } from "@twilio/conversations";
-import { getAllUsers } from "../Services/userService";
-import {updateTypingIndicator}  from "../utils/updateTypingIndicator";
+// import { getAllUsers } from "../Services/userService";
+// import {updateTypingIndicator}  from "../utils/updateTypingIndicator";
+
+
+
+const updateTypingIndicator = (participant, isTyping) => {
+  console.log(`${participant.identity} ${isTyping ? 'started' : 'stopped'} typing`);
+
+};
 
 
 const useConversationStore = create((set, get) => ({
@@ -49,6 +56,7 @@ const useConversationStore = create((set, get) => ({
       
       // Fetch initial conversations
       await get().getConversations();
+      console.log(conversations)
       
     } catch (err) {
       console.error("Error initializing Twilio client:", err);
@@ -332,7 +340,8 @@ addParticipants: async (sid, participants) => {
 
   try {
     const conv = await client.getConversationBySid(sid);
-    const res = await getAllUsers();
+    // const res = await getAllUsers();
+    const res = { data: [] };
     console.log("Fetched users:", res);
 
     // Filter users to add

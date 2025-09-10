@@ -5,11 +5,13 @@ import Badge from "./UIHelpers/Badge.jsx";
 import { Card } from "./UIHelpers/Card.jsx";
 import { ScrollArea } from "./UIHelpers/ScrollArea.jsx";
 import { Clock, User, AlertTriangle } from "lucide-react";
+import useConversationStore from "../Stores/useConversationStore.js";
 
 dayjs.extend(relativeTime);
 
 export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
   const [filter, setFilter] = useState("all");
+  
 
   const statusConfig = {
     open: { color: "bg-primary  text-white", label: "Open" },

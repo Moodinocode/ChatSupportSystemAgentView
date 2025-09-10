@@ -16,8 +16,9 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     login(userDetails).then((response)=>{
-      const { token, ...userData } = response.data;
-      sessionStorage.setItem("token", `${token}`);
+      const { userData } = response.data;
+      sessionStorage.setItem("token", `${userData.authToken}`);
+      sessionStorage.setItem("twilioToken", `${userData.twilioToken}`);
       sessionStorage.setItem("user", JSON.stringify(userData));
       console.log("logging in")
       

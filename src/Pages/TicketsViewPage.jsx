@@ -5,7 +5,6 @@ import TicketDetails from '../Components/TicketDetails';
 import TicketDashboard from '../Components/TicketDashboard';
 import AssignmentPanel from '../Components/AssignmentPanel';
 import { LayoutDashboard, Users, MessageSquare } from "lucide-react";
-import { mockMessages } from '../assets/mockdata';
 import useTicketStore from '../Stores/useTicketStore';
 
 const TicketsViewPage = () => {
@@ -32,11 +31,10 @@ const TicketsViewPage = () => {
 
   console.log("Tickets from store:", tickets);
 
-  // Get selected ticket data
-  const selectedTicketData = selectedTicket ? getTicketById(selectedTicket) : null;
-  const messages = selectedTicket ? mockMessages[selectedTicket] || [] : [];
 
-  // Fetch tickets on component mount
+  const selectedTicketData = selectedTicket ? getTicketById(selectedTicket) : null;
+
+
   useEffect(() => {
     fetchTickets().then(() => {
       console.log("Fetched tickets:", tickets)
@@ -56,11 +54,6 @@ const TicketsViewPage = () => {
     setViewMode("chat");
   };
 
-  const handleSendMessage = (content) => {
-    console.log("Sending message:", content);
-    // Toast notification would go here
-    alert("Message sent to customer");
-  };
 
   const onTakeTicket = async () => {
     if (selectedTicketData) {
@@ -73,7 +66,7 @@ const TicketsViewPage = () => {
 
   const onAssignTicket = () => {
     alert("Assignment feature would open here");
-    // You could implement a modal or dropdown for agent selection
+    
   };
 
   const onResolveTicket = async () => {
@@ -183,10 +176,8 @@ const TicketsViewPage = () => {
         {viewMode === "chat" && selectedTicketData ? (
           <>
             <ChatInterface 
-              ticket={selectedTicketData}
-              messages={messages}
-              onSendMessage={handleSendMessage}
-            />
+  ticket={selectedTicketData}
+/>
             <TicketDetails 
               ticket={selectedTicketData}
               currentAgent={currentAgent}

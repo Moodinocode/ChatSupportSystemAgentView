@@ -1,17 +1,40 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { ScrollArea } from "./UIHelpers/ScrollArea";
 import { Send, Paperclip, MoreVertical } from "lucide-react";
 import ChatBubble from "./UIHelpers/ChatBubble";
+import useConversationStore from "../Stores/useConversationStore";
 
-const ChatInterface = ({ ticket, messages, onSendMessage }) => {
+const ChatInterface = ({ ticket}) => {
   const [newMessage, setNewMessage] = useState("");
+  const { conversations, activeConversation, setActiveConversation, sendMessage } = useConversationStore();
 
-  const handleSend = () => {
-    if (newMessage.trim()) {
-      onSendMessage(newMessage);
-      setNewMessage("");
+useEffect(() => {
+  if (ticket?.conversationSid) {
+    const conversationData = conversations.find(
+      c => c.conversation.sid === ticket.conversationSid
+    );
+
+    if (conversationData) {
+      setActiveConversation(conversationData);
+    } else {
+      // If not in local store, still set active with minimal data
+      setActiveConversation({ conversation: { sid: ticket.conversationSid }, messages: [] });
     }
-  };
+  }
+}, [ticket?.conversationSid, conversations, setActiveConversation]);
+
+
+const handleSend = async () => {
+  if (newMessage.trim() && activeConversation?.conversation?.sid) {
+    try {
+      await sendMessage(activeConversation.conversation.sid, newMessage);
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  }
+};
+
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -45,17 +68,23 @@ const ChatInterface = ({ ticket, messages, onSendMessage }) => {
       </div>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <ChatBubble
-              key={message.id}
-              message={message}
-              isAgent={message.sender === "agent"}
-            />
-          ))}
-        </div>
-      </ScrollArea>
+<ScrollArea className="flex-1 p-4">
+  <div className="space-y-4">
+    {activeConversation?.messages?.map((message) => (
+      <ChatBubble
+        key={message.sid}
+        message={{
+          id: message.sid,
+          content: message.body,
+          sender: message.author,
+          timestamp: message.timestamp,
+        }}
+        isAgent={message.author !== ticket.customer.username}
+      />
+    ))}
+  </div>
+</ScrollArea>
+
 
       {/* Message Input */}
       <div className="border-t bg-base-100 p-4">
