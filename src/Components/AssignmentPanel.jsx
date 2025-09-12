@@ -2,58 +2,18 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./UIHelpers/Card";
 import Badge from "./UIHelpers/Badge";
 import { ScrollArea } from "./UIHelpers/ScrollArea";
+import {mockAgents} from "../assets/mockdata";
 import { 
   Users, 
-  UserCheck, 
-  Clock, 
+  UserCheck,  
   AlertTriangle,
   CheckSquare,
   User
 } from "lucide-react";
 
-const mockAgents = [
-  {
-    id: "1",
-    name: "Alice Cooper",
-    email: "alice@company.com", 
-    activeTickets: 3,
-    maxCapacity: 8,
-    status: "available",
-    specialties: ["Technical", "Billing"]
-  },
-  {
-    id: "2", 
-    name: "John Smith",
-    email: "john@company.com",
-    activeTickets: 5,
-    maxCapacity: 10,
-    status: "busy",
-    specialties: ["General", "Technical"]
-  },
-  {
-    id: "3",
-    name: "Emma Wilson", 
-    email: "emma@company.com",
-    activeTickets: 2,
-    maxCapacity: 6,
-    status: "available",
-    specialties: ["Billing", "Account"]
-  },
-  {
-    id: "4",
-    name: "David Brown",
-    email: "david@company.com", 
-    activeTickets: 1,
-    maxCapacity: 8,
-    status: "away",
-    specialties: ["Technical", "Advanced"]
-  }
-];
-
-const AssignmentPanel = ({ tickets, onAssignTickets, onBulkAssign }) => {
+const AssignmentPanel = ({ tickets, onAssignTickets }) => {
   const [selectedTickets, setSelectedTickets] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState("");
-  const [assignmentMode, setAssignmentMode] = useState("single");
 
   const unassignedTickets = tickets.filter(t => !t.assignedTo && t.status !== "resolved");
   const urgentTickets = unassignedTickets.filter(t => t.status === "urgent");

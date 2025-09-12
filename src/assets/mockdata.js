@@ -11,7 +11,7 @@ export const mockTickets = [
     status: "open", // open, pending, resolved, closed
     assignedTo: null, // agent ID or null if unassigned
     team: "Technical Support", // or category
-    twilioConversationSid: "CH1234567890abcdef",
+    twilioConversationSid: "CHa7bd14f89532426c92d84cb6c7a07f69",
     createdAt: "2025-09-10T08:00:00Z",
     updatedAt: "2025-09-08T08:15:00Z"
   },
@@ -160,3 +160,43 @@ export const mockMessages = {
     }
   ]
 };
+
+
+export const mockAgents = [
+  {
+    id: "1",
+    name: "Alice Cooper",
+    email: "alice@company.com", 
+    activeTickets: 3,
+    maxCapacity: 8,
+    status: "available",
+    specialties: ["Technical", "Billing"]
+  },
+  {
+    id: "2", 
+    name: "John Smith",
+    email: "john@company.com",
+    activeTickets: 5,
+    maxCapacity: 10,
+    status: "busy",
+    specialties: ["General", "Technical"]
+  },
+  {
+    id: "3",
+    name: "Emma Wilson", 
+    email: "emma@company.com",
+    activeTickets: 2,
+    maxCapacity: 6,
+    status: "available",
+    specialties: ["Billing", "Account"]
+  },
+  {
+    id: "4",
+    name: "David Brown",
+    email: "david@company.com", 
+    activeTickets: 1,
+    maxCapacity: 8,
+    status: "away",
+    specialties: ["Technical", "Advanced"]
+  }
+];

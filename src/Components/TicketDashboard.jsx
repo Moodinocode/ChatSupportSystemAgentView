@@ -10,7 +10,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-const TicketDashboard = ({ tickets = [], currentAgent, stats = {} }) => {
+const TicketDashboard = ({ tickets = [], stats = {} }) => {
 
  const recentActivity = tickets
     .filter(t => t.status !== "resolved")
@@ -126,7 +126,7 @@ const TicketDashboard = ({ tickets = [], currentAgent, stats = {} }) => {
                     <div className="flex flex-col items-center justify-between w-36">
                     <div className="flex items-center gap-2">
                       <Badge
-                        text={ticket.status}
+                        text={ticket.status.name}
                         classnames={`text-xs ${
                           ticket.status === "urgent"
                             ? "bg-urgent text-urgent-foreground"

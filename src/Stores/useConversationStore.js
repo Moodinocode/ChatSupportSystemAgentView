@@ -1,8 +1,5 @@
-// src/store/useConversationStore.js
 import { create } from "zustand";
 import { Client } from "@twilio/conversations";
-// import { getAllUsers } from "../Services/userService";
-// import {updateTypingIndicator}  from "../utils/updateTypingIndicator";
 
 
 
@@ -27,6 +24,7 @@ const useConversationStore = create((set, get) => ({
       if (!token) throw new Error("Missing Twilio token in session storage");
     
       const client = new Client(token);
+      console.log("Twilio client initialized");
       client.on("conversationLeft", (conv) => {
         const { conversations } = get();
         set({
@@ -53,10 +51,6 @@ const useConversationStore = create((set, get) => ({
       });
 
       set({ client, loading: false });
-      
-      // Fetch initial conversations
-      await get().getConversations();
-      console.log(conversations)
       
     } catch (err) {
       console.error("Error initializing Twilio client:", err);
@@ -222,53 +216,57 @@ setTypingEnded: (conversationSid, participant) => {
 
   },
 
-setActiveConversation: async (active) => {
-  try {
-    const { client } = get(); 
-    if (!client) {
-      console.error("Twilio client not initialized yet");
-      return;
-    }
-    console.log("Setting active conversation:", active.conversation);
-    // Fetch the conversation
-    const conversation = await client.getConversationBySid(active.conversation.sid);
-console.log("Active conversation fetched:", conversation);
+  setActiveConversation: async (active) => {
+    try {
+      const { client } = get(); 
+      if (!client) {
+        console.error("Twilio client not initialized yet");
+        return;
+      }
+      console.log("Setting active conversation:", active.conversation);
+      // Fetch the conversation
+      const conversation = await client.getConversationBySid(active.conversation.sid);
+      console.log("Active conversation fetched:", conversation);
 
-const builtconversation = await get().buildConversationData(conversation);
+      const builtconversation = await get().buildConversationData(conversation);
 
-if (!builtconversation) {
-  console.error("Active conversation not found:", active);
-  return;
-}
-console.log("Active conversation set:", builtconversation);
+      if (!builtconversation) {
+        console.error("Active conversation not found:", active);
+        return;
+      }
+      console.log("Active conversation set:", builtconversation);
 
-builtconversation.unreadCount = 0;
-set({ activeConversation: builtconversation });
-set((state) => ({
-  conversations: state.conversations.map((c) =>
-    c.conversation.sid === builtconversation.conversation.sid
-      ? { ...c, ...builtconversation, lastActivity: c.lastActivity } // keep old lastActivity
-      : c
-  ),
-}));
+      builtconversation.unreadCount = 0;
+      set({ activeConversation: builtconversation });
+      set((state) => ({
+        conversations: state.conversations.map((c) =>
+          c.conversation.sid === builtconversation.conversation.sid
+            ? { ...c, ...builtconversation, lastActivity: c.lastActivity } // keep old lastActivity
+            : c
+        ),
+      }));
 
 
 
-// Attach typing listeners to the Twilio conversation object
-conversation.on('typingStarted', function(participant) {
-  console.log("Typing started by:", participant.identity);
-  updateTypingIndicator(participant, true);
-});
+    // Attach typing listeners to the Twilio conversation object
+    conversation.on('typingStarted', function(participant) {
+      console.log("Typing started by:", participant.identity);
+      updateTypingIndicator(participant, true);
+    });
 
-conversation.on('typingEnded', function(participant) {
-  updateTypingIndicator(participant, false);
-});    
+    conversation.on('typingEnded', function(participant) {
+      updateTypingIndicator(participant, false);
+    });    
 
   } catch (error) {
     console.error("Error fetching conversation:", error);
   }
 },
 
+//should i remove leave conversation? would the agent be automattically removed on conversation closed by the backend? 
+//If ticket is closed, agent can see previous conversations and messages? if yes then would it come from tiwlio or from mongodb
+//if from twilio then the agent would not leave the conversation --> just unable to send messages --> issue is that incase the issue is reopened
+// the agent would be still in the conversation even though another agent might handle it
 leaveConversation: async (sid) => {
     const { client, activeConversation, conversations } = get();
     if (!client) return;
@@ -286,10 +284,6 @@ leaveConversation: async (sid) => {
       console.error("Error leaving conversation:", error);
     }
   },
-  
-
-
-
 
   sendMessage: async (sid, body) => {
     const { client } = get();
@@ -303,72 +297,7 @@ leaveConversation: async (sid) => {
   }
   },
 
-  createConversation: async (newConversationName,selectedUsers) => {
-    const { client } = get();
-    if (!client) return;
 
-    try {
-      console.log("Creating conversation:", newConversationName, "with users:", selectedUsers);
-      const conversation = await client.createConversation({
-        attributes: {},
-        friendlyName: newConversationName,
-        uniqueName: newConversationName+ Math.random().toString(36).substring(2, 15), 
-      });
-      console.log("Conversation created:", conversation.sid);
-      
-      get().addParticipants(conversation.sid, selectedUsers).then(() => {
-        console.log("Participants added successfully")
-        }
-        ).catch((error) => {
-          console.error("Error adding participants:", error);
-        }
-      );
-      
-
-
-      get().syncConversation(conversation);
-      return conversation;
-    } catch (error) {
-      console.error("Error creating conversation:", error);
-      throw error;
-    }
-  },
-
-addParticipants: async (sid, participants) => {
-  const { client } = get();
-  if (!client) return;
-
-  try {
-    const conv = await client.getConversationBySid(sid);
-    // const res = await getAllUsers();
-    const res = { data: [] };
-    console.log("Fetched users:", res);
-
-    // Filter users to add
-    const usersToAdd = res.data.filter(u => participants.includes(u.id));
-
-    for (const user of usersToAdd) {
-      const identity = String(user.username); // ensure string
-      console.log(`Adding participant with identity: ${identity}`);
-      
-      try {
-        await conv.add(identity);
-        console.log(`Added participant: ${identity}`);
-      } catch (error) {
-        console.error(`Failed to add participant ${identity}:`, error);
-      }
-    }
-
-    await get().updateParticipants(sid);
-  } catch (err) {
-    console.error("Failed to add participants:", err);
-  }
-},
-
-
-  removeParticipant: async (sid, participant) => {
-    await apiRemoveParticipant(sid, participant);
-  },
 }));
 
 export default useConversationStore;

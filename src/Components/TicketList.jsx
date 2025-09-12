@@ -57,12 +57,12 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
                   ? "ring-2 ring-primary bg-gray-50"
                   : "hover:bg-gray-50"
               }`}
-              onClick={() => onTicketSelect(ticket.id)}
+              onClick={() => onTicketSelect(ticket)}
             >
       
             <div className="flex items-start justify-between mb-2">
               {(() => {
-                const safeStatus = statusConfig[ticket.status] || statusConfig["pending"];
+                const safeStatus = statusConfig[ticket.status.name] || statusConfig["pending"];
                 
 
                 return (
@@ -90,7 +90,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
               {/* Customer */}
               <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
                 <User className="w-3 h-3" />
-                <span className="truncate">{ticket.customer.name}</span>
+                <span className="truncate">customerid: {ticket.customerId}</span>
               </div>
 
               {/* Last message */}

@@ -4,16 +4,37 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setUser({ token }); 
+    const token = sessionStorage.getItem("token");
+    const userData = sessionStorage.getItem("user");
+
+    if (token && userData) {
+      setUser({ token, ...JSON.parse(userData) });
     }
+    setLoading(false);
   }, []);
 
+  
+  const loginUser = (authToken,twilioToken, refresh,userData) => {
+    sessionStorage.setItem("token", authToken);
+    sessionStorage.setItem("refreshToken", refresh);
+    sessionStorage.setItem("user", JSON.stringify(userData));
+    sessionStorage.setItem("twilioToken", twilioToken);
+    setUser({ token: authToken, ...userData });
+  };
+
+ 
+  const logoutUser = () => {
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthContext.Provider value={{ user, setUser, loading, loginUser, logoutUser }}>
       {children}
     </AuthContext.Provider>
   );

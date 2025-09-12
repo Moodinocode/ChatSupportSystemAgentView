@@ -1,32 +1,29 @@
 import { create } from "zustand";
-import { 
-    getTicketById,
-    takeTicket,
-    bulkTakeTickets,
-    assignTicket,
-    bulkAssignTickets,
-    updateTicketStatus,
-    bulkUpdateTicketStatus,
-    getTickets
-} from "../Services/ticketService";
-
+import { takeTicket, getTickets } from "../Services/ticketService";
+import { mockTickets } from "../assets/mockdata";
 const useTicketStore = create((set, get) => ({
   tickets: [],
   selectedTicket: null,
   loading: false,
   error: null,
-  currentAgent: "Agent 1", // -- based on login, hardcoded for now
+  currentAgent: "Agent1", 
 
   
+  // fetchTickets: async () => {
+  //   set({ loading: true, error: null });
+  //   try {
+  //   getTickets().then(response => {
+  //     console.log("API response:", response);
+  //     set({ tickets: response.data, loading: false });
+  //     });
+  //   } catch (error) {
+  //     set({ error: error.message, loading: false });
+  //   }
+  // },
   fetchTickets: async () => {
-    set({ loading: true, error: null });
-    try {
-    getTickets().then(response => {
-      set({ tickets: response.data, loading: false });
-      });
-    } catch (error) {
-      set({ error: error.message, loading: false });
-    }
+
+      set({ tickets: mockTickets });
+    
   },
 
   // Get a specific ticket by ID
@@ -63,28 +60,6 @@ const useTicketStore = create((set, get) => ({
     }
   },
 
-  // Bulk take tickets
-  handleBulkTakeTickets: async (ticketIds) => {
-    const { currentAgent, tickets } = get();
-    set({ loading: true, error: null });
-    
-    try {
-      await bulkTakeTickets(ticketIds, currentAgent);
-      
-      // Update local state
-      const updatedTickets = tickets.map(ticket => 
-        ticketIds.includes(ticket.id) 
-          ? { ...ticket, assignedTo: currentAgent, status: "open" }
-          : ticket
-      );
-      
-      set({ tickets: updatedTickets, loading: false });
-      return { success: true, message: `${ticketIds.length} ticket(s) taken successfully` };
-    } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, message: error.message };
-    }
-  },
 
   // Assign ticket to specific agent
   handleAssignTicket: async (ticketId, agentId) => {
@@ -109,28 +84,7 @@ const useTicketStore = create((set, get) => ({
     }
   },
 
-  // Bulk assign tickets
-  handleBulkAssignTickets: async (ticketIds, agentId) => {
-    const { tickets } = get();
-    set({ loading: true, error: null });
-    
-    try {
-      await bulkAssignTickets(ticketIds, agentId);
-      
-      // Update local state
-      const updatedTickets = tickets.map(ticket => 
-        ticketIds.includes(ticket.id) 
-          ? { ...ticket, assignedTo: agentId }
-          : ticket
-      );
-      
-      set({ tickets: updatedTickets, loading: false });
-      return { success: true, message: `${ticketIds.length} ticket(s) assigned successfully` };
-    } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, message: error.message };
-    }
-  },
+
 
   // Update ticket status (resolve, reopen, etc.)
   handleUpdateTicketStatus: async (ticketId, status) => {
@@ -160,30 +114,8 @@ const useTicketStore = create((set, get) => ({
     }
   },
 
-  // Bulk update ticket status
-  handleBulkUpdateTicketStatus: async (ticketIds, status) => {
-    const { tickets } = get();
-    set({ loading: true, error: null });
-    
-    try {
-      await bulkUpdateTicketStatus(ticketIds, status);
-      
-      // Update local state
-      const updatedTickets = tickets.map(ticket => 
-        ticketIds.includes(ticket.id) 
-          ? { ...ticket, status: status }
-          : ticket
-      );
-      
-      set({ tickets: updatedTickets, loading: false });
-      return { success: true, message: `${ticketIds.length} ticket(s) ${status} successfully` };
-    } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, message: error.message };
-    }
-  },
 
-  // Convenience methods for specific status updates
+
   handleResolveTicket: async (ticketId) => {
     return get().handleUpdateTicketStatus(ticketId, "resolved");
   },
@@ -192,7 +124,7 @@ const useTicketStore = create((set, get) => ({
     return get().handleUpdateTicketStatus(ticketId, "open");
   },
 
-  // Get filtered tickets
+ 
   getFilteredTickets: (filter = "all") => {
     const { tickets } = get();
     if (filter === "all") return tickets;
@@ -226,20 +158,7 @@ getTicketStats: () => {
       .slice(0, limit);
   },
 
-  // Clear error
-  clearError: () => {
-    set({ error: null });
-  },
 
-  // Reset store
-  resetStore: () => {
-    set({
-      tickets: [],
-      selectedTicket: null,
-      loading: false,
-      error: null
-    });
-  }
 }));
 
 export default useTicketStore;

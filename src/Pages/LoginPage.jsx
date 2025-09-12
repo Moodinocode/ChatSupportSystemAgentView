@@ -1,9 +1,9 @@
 import UsernameInput from '../Components/AuthComponents/UsernameInput'
 import PasswordInput from '../Components/AuthComponents/PasswordInput'
 import {Link, useNavigate} from 'react-router-dom'
-import { useState,useContext } from 'react'
-// import OAuthButton from '../Components/AuthComponents/OAuthButton'
+import { useState } from 'react'
 import { login } from '../Services/authService'
+import { useAuth } from '../Context/AuthContext'
 
 const LoginPage = () => {
   const [userDetails, setUserDetails] = useState({
@@ -11,18 +11,17 @@ const LoginPage = () => {
     password: ''
   });
   const navigate = useNavigate();
+  const { loginUser } = useAuth()
+
 
 
   const handleSubmit = (e) => {
     e.preventDefault()
     login(userDetails).then((response)=>{
-      const { userData } = response.data;
-      sessionStorage.setItem("token", `${userData.authToken}`);
-      sessionStorage.setItem("twilioToken", `${userData.twilioToken}`);
-      sessionStorage.setItem("user", JSON.stringify(userData));
-      console.log("logging in")
+      const { authToken, twilioToken,refreshToken, ...user } = response.data;
+      loginUser(authToken,twilioToken, refreshToken, user);
       
-      navigate('/home')
+      navigate('/')
     }).catch((error) => console.log(error))
 
   }

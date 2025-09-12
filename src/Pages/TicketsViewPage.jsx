@@ -6,6 +6,8 @@ import TicketDashboard from '../Components/TicketDashboard';
 import AssignmentPanel from '../Components/AssignmentPanel';
 import { LayoutDashboard, Users, MessageSquare } from "lucide-react";
 import useTicketStore from '../Stores/useTicketStore';
+import useConversationStore from '../Stores/useConversationStore';
+
 
 const TicketsViewPage = () => {
   const [viewMode, setViewMode] = useState("dashboard");
@@ -16,20 +18,16 @@ const TicketsViewPage = () => {
     selectedTicket,
     currentAgent,
     loading,
-    error,
     fetchTickets,
     setSelectedTicket,
     getTicketById,
     handleTakeTicket,
-    handleAssignTicket,
     handleResolveTicket,
     handleReopenTicket,
-    handleBulkAssignTickets,
     getTicketStats,
-    clearError
   } = useTicketStore();
 
-  console.log("Tickets from store:", tickets);
+  const { initClient, client, setActiveConversation } = useConversationStore();
 
 
   const selectedTicketData = selectedTicket ? getTicketById(selectedTicket) : null;
@@ -39,19 +37,29 @@ const TicketsViewPage = () => {
     fetchTickets().then(() => {
       console.log("Fetched tickets:", tickets)
       });
+      initClient()
   }, [fetchTickets]);
 
-  // Show error toast/notification
-  useEffect(() => {
-    if (error) {
-      alert(error); // Replace with your preferred notification system
-      clearError();
-    }
-  }, [error, clearError]);
 
-  const handleTicketSelect = (ticketId) => {
-    setSelectedTicket(ticketId);
+  const handleTicketSelect = async(ticket) => {
+    console.log("Selected ticket:", ticket);
+    setSelectedTicket(ticket.id);
+    console.log("Ticket's conversation SID:", ticket.twilioConversationSid);
+    
+    if (!client) {
+      console.error("Twilio client not initialized");
+      return;
+    }
+    try {
+    const conversation = await client.getConversationBySid(ticket.twilioConversationSid)
+    console.log("Setting active conversation for ticket:", ticket.id, conversation);
+    await setActiveConversation({conversation});
     setViewMode("chat");
+  } catch (error) {
+      console.error("Error fetching conversation:", error);
+      return;
+    }
+    
   };
 
 
@@ -87,17 +95,7 @@ const TicketsViewPage = () => {
     }
   };
 
-  const handleAssignTickets = async (ticketIds, agentId) => {
-    const result = await handleBulkAssignTickets(ticketIds, agentId);
-    if (result.success) {
-      alert(result.message);
-    }
-  };
 
-  const handleBulkAssign = (assignments) => {
-    console.log("Bulk assign:", assignments);
-    alert("Tickets assigned successfully");
-  };
 
   // Show loading spinner
   if (loading && tickets.length === 0) {
@@ -169,7 +167,6 @@ const TicketsViewPage = () => {
           <AssignmentPanel 
             tickets={tickets}
             onAssignTickets={handleAssignTickets}
-            onBulkAssign={handleBulkAssign}
           />
         )}
 

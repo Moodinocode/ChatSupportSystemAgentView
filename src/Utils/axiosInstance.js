@@ -5,6 +5,7 @@ const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true'
   },
 });
 
@@ -35,7 +36,7 @@ axiosInstance.interceptors.response.use(
 
 
       if (error.response.status === 401) {
-        sessionStorage.removeItem('token');
+        sessionStorage.clear();
 
         window.location.href = '/login'; 
       }
