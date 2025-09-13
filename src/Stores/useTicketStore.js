@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { takeTicket, getTickets } from "../Services/ticketService";
-import { mockTickets } from "../assets/mockdata";
+import { useAuth } from "../Context/AuthContext";
+
 const useTicketStore = create((set, get) => ({
   tickets: [],
   selectedTicket: null,
   loading: false,
   error: null,
-  currentAgent: "Agent1", 
+
 
   
   fetchTickets: async () => {
@@ -39,16 +40,16 @@ const useTicketStore = create((set, get) => ({
 
   // Take a ticket (assign to current agent)
   handleTakeTicket: async (ticketId) => {
-    const { currentAgent, tickets } = get();
+    const {  tickets } = get();
     set({ loading: true, error: null });
     
     try {
-      await takeTicket(ticketId, currentAgent);
+      await takeTicket(ticketId);
       
       // Update local state
       const updatedTickets = tickets.map(ticket => 
         ticket.id === ticketId 
-          ? { ...ticket, assignedTo: currentAgent, status: "open" }
+          ? { ...ticket, assignedTo:JSON.parse(sessionStorage.getItem("user")).username, status: "open" }
           : ticket
       );
       
@@ -102,8 +103,8 @@ const useTicketStore = create((set, get) => ({
       );
       
       const ticket = tickets.find(t => t.id === ticketId);
-      const statusMessage = status === "resolved" 
-        ? `Ticket #${ticket?.number} has been resolved`
+      const statusMessage = status === "closed" 
+        ? `Ticket #${ticket?.number} has been closed`
         : `Ticket #${ticket?.number} has been ${status}`;
       
       set({ tickets: updatedTickets, loading: false });
@@ -117,7 +118,7 @@ const useTicketStore = create((set, get) => ({
 
 
   handleResolveTicket: async (ticketId) => {
-    return get().handleUpdateTicketStatus(ticketId, "resolved");
+    return get().handleUpdateTicketStatus(ticketId, "closed");
   },
 
   handleReopenTicket: async (ticketId) => {
@@ -131,23 +132,7 @@ const useTicketStore = create((set, get) => ({
     return tickets.filter(ticket => ticket.status === filter);
   },
 
-  // Get ticket statistics
-getTicketStats: () => {
-  const { tickets, currentAgent } = get();
 
-  // Ensure tickets is always an array
-  const safeTickets = Array.isArray(tickets) ? tickets : [];
-
-  return {
-    total: safeTickets.length,
-    open: safeTickets.filter(t => t.status === "open").length,
-    pending: safeTickets.filter(t => t.status === "pending").length,
-    urgent: safeTickets.filter(t => t.status === "urgent").length,
-    closed: safeTickets.filter(t => t.status === "resolved").length,
-    unassigned: safeTickets.filter(t => !t.assignedTo).length,
-    myTickets: safeTickets.filter(t => t.assignedTo === currentAgent).length,
-  };
-},
 
   // Get recent activity (non-resolved tickets sorted by timestamp)
   getRecentActivity: (limit = 5) => {

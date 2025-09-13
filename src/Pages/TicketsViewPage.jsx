@@ -7,10 +7,13 @@ import AssignmentPanel from '../Components/AssignmentPanel';
 import { LayoutDashboard, Users, MessageSquare } from "lucide-react";
 import useTicketStore from '../Stores/useTicketStore';
 import useConversationStore from '../Stores/useConversationStore';
+import { useAuth } from '../Context/AuthContext';
 
 
 const TicketsViewPage = () => {
   const [viewMode, setViewMode] = useState("dashboard");
+
+  const {user} = useAuth()
   
   // Zustand store
   const {
@@ -24,10 +27,10 @@ const TicketsViewPage = () => {
     handleTakeTicket,
     handleResolveTicket,
     handleReopenTicket,
-    getTicketStats,
+    
   } = useTicketStore();
 
-  const { initClient, client, setActiveConversation } = useConversationStore();
+  const { initClient, client, setActiveConversation,activeConversation } = useConversationStore();
 
 
   const selectedTicketData = selectedTicket ? getTicketById(selectedTicket) : null;
@@ -42,6 +45,26 @@ const TicketsViewPage = () => {
 
 
   const handleTicketSelect = async(ticket) => {
+    if (activeConversation) {
+      const currentTicket = tickets.find(
+        (t) => t.twilioConversationSid === activeConversation.sid
+      );
+
+      //get ticket with conversation id same as active conversation by id
+      //check if assigned to self
+      //if not then leave()
+      if (currentTicket && currentTicket.assignedTo !== user.username) {
+        try {
+          const conv = await client.getConversationBySid(activeConversation.sid);
+          await conv.leave();
+          console.log("Left conversation for ticket:", currentTicket.id);
+        } catch (error) {
+          console.error("Error leaving conversation:", error);
+        }
+      }
+
+
+    }
     console.log("Selected ticket:", ticket);
     setSelectedTicket(ticket.id);
     console.log("Ticket's conversation SID:", ticket.twilioConversationSid);
@@ -52,6 +75,7 @@ const TicketsViewPage = () => {
     }
     try {
     const conversation = await client.getConversationBySid(ticket.twilioConversationSid)
+    //await conversation.join() -- if not already a participant --> ticket not asssigned to me
     console.log("Setting active conversation for ticket:", ticket.id, conversation);
     await setActiveConversation({conversation});
     setViewMode("chat");
@@ -159,7 +183,6 @@ const TicketsViewPage = () => {
           <TicketDashboard 
             tickets={tickets} 
             currentAgent={currentAgent} 
-            stats={getTicketStats()} // Pass pre-calculated stats
           />
         )}
 

@@ -1,4 +1,4 @@
-import React from "react";
+import { useAuth } from '../Context/AuthContext.jsx';
 import  Badge  from './UIHelpers/Badge.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from "./UIHelpers/Card.jsx";
 import { Separator } from "./UIHelpers/Seperator.jsx";
@@ -15,33 +15,24 @@ import {
 } from "lucide-react";
 
 const statusConfig = {
-  open: { color: "bg-primary text-primary-foreground", label: "Open" },
+  OPEN: { color: "bg-primary text-primary-foreground", label: "Open" },
   pending: { color: "bg-warning text-warning-foreground", label: "Pending" },
-  closed: { color: "bg-success text-success-foreground", label: "closed" },
+  CLOSED: { color: "bg-success text-success-foreground", label: "CLOSED" },
   urgent: { color: "bg-urgent text-urgent-foreground", label: "Urgent" }
 };
 
 
 const TicketDetails = ({ 
-  ticket, 
-  currentAgent,
-  onTakeTicket, 
-  onAssignTicket, 
-  onResolveTicket,
-  onReopenTicket 
-}) => {
-    if (!ticket) {
-  return (
-    <div className="p-4 text-gray-500">
-      Select a ticket to view details
-    </div>
-  );
-}
+    ticket, 
+    currentAgent,
+    onTakeTicket, 
+    onAssignTicket, 
+    onResolveTicket,
+    onReopenTicket 
+  }) => {
+    if (!ticket) return <div> </div>
 
-  const isAssignedToCurrentAgent = ticket.assignedTo === currentAgent;
-  const canTakeTicket = !ticket.assignedTo && ticket.status !== "resolved";
-  const canResolve = isAssignedToCurrentAgent && ticket.status !== "resolved";
-  const canReopen = ticket.status === "resolved";
+  const {user} = useAuth();
 
   return (
     <div className="w-80 border-l bg-card h-full overflow-y-auto">
@@ -54,7 +45,7 @@ const TicketDetails = ({
             <CardTitle className="text-sm">Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {canTakeTicket && (
+            {ticket.status === "OPEN" && (
               <button 
                 onClick={onTakeTicket}
                 className="btn btn-primary btn-sm w-full flex items-center gap-2"
@@ -64,35 +55,26 @@ const TicketDetails = ({
               </button>
             )}
             
-            {isAssignedToCurrentAgent && (
-              <button 
-                onClick={onAssignTicket}
-                className="btn btn-outline btn-sm w-full flex items-center gap-2"
-              >
-                <UserX className="w-4 h-4" />
-                Reassign
-              </button>
+            {(ticket.status === "pending" && ticket.assignedTo === user.username)  && (
+              <>
+                <button 
+                  onClick={onAssignTicket}
+                  className="btn btn-outline btn-sm w-full flex items-center gap-2"
+                >
+                  <UserX className="w-4 h-4" />
+                  Reassign
+                </button>
+                <button 
+                  onClick={onResolveTicket}
+                  className="btn btn-outline btn-sm w-full flex items-center gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Resolve
+                </button>
+              </>
             )}
             
-            {canResolve && (
-              <button 
-                onClick={onResolveTicket}
-                className="btn btn-outline btn-sm w-full flex items-center gap-2"
-              >
-                <CheckCircle className="w-4 h-4" />
-                Resolve
-              </button>
-            )}
-            
-            {canReopen && (
-              <button 
-                onClick={onReopenTicket}
-                className="btn btn-outline btn-sm w-full flex items-center gap-2"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Reopen
-              </button>
-            )}
+    
           </CardContent>
         </Card>
 

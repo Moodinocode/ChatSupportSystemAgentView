@@ -89,7 +89,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
               {/* Customer */}
               <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
                 <User className="w-3 h-3" />
-                <span className="truncate">customerid: {ticket.customerId}</span>
+                <span className="truncate">{ticket.customer.username}</span>
               </div>
 
               {/* Last message */}
