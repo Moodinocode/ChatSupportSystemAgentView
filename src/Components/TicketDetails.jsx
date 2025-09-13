@@ -28,11 +28,11 @@ const TicketDetails = ({
     onTakeTicket, 
     onAssignTicket, 
     onResolveTicket,
-    onReopenTicket 
   }) => {
     if (!ticket) return <div> </div>
 
   const {user} = useAuth();
+  console.log(ticket)
 
   return (
     <div className="w-80 border-l bg-card h-full overflow-y-auto">
@@ -55,10 +55,12 @@ const TicketDetails = ({
               </button>
             )}
             
-            {(ticket.status === "pending" && ticket.assignedAgent === user.username)  && (
-              <>
+            {(ticket.status === "pending" && ticket.assignedAgent.username === user.username)  && (
+             
+             <>
+              
                 <button 
-                  onClick={onAssignTicket}
+                  onClick={onAssignTicket}//it should open a dropdown list of either agents or categories to reassign
                   className="btn btn-outline btn-sm w-full flex items-center gap-2"
                 >
                   <UserX className="w-4 h-4" />
@@ -119,7 +121,7 @@ const TicketDetails = ({
                 <UserCheck className="w-4 h-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Assigned to</p>
-                  <p className="text-xs text-primary font-medium">{ticket.assignedAgent}</p>
+                  <p className="text-xs text-primary font-medium">{ticket.assignedAgent.username}</p>
                 </div>
               </div>
             )}

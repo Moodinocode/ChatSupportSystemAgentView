@@ -27,12 +27,12 @@ const useTicketStore = create((set, get) => ({
     return tickets.find(ticket => ticket.id === ticketId);
   },
 
-  // Set selected ticket
+  
   setSelectedTicket: (ticketId) => {
     set({ selectedTicket: ticketId });
   },
 
-handleTakeTicket: async (ticketId) => {
+handleTakeTicket: async (ticketId,newstatus) => {
   const { tickets } = get();
   set({ loading: true, error: null });
   
@@ -53,7 +53,7 @@ handleTakeTicket: async (ticketId) => {
         email: currentUser.email
     
       },
-      status: "pending" 
+      status: newstatus 
     };
     
     try {
@@ -80,29 +80,48 @@ handleTakeTicket: async (ticketId) => {
 },
 
 
-  // Assign ticket to specific agent
-  handleAssignTicket: async (ticketId, agentId) => {
-    const { tickets } = get();
-    set({ loading: true, error: null });
-    
-    try {
-      await assignTicket(ticketId, agentId);
-      
-      
-      // Update local state
-      const updatedTickets = tickets.map(ticket => 
-        ticket.id === ticketId 
-          ? { ...ticket, assignedAgent: agentId }
-          : ticket
-      );
-      
-      set({ tickets: updatedTickets, loading: false });
-      return { success: true, message: `Ticket assigned to ${agentId}` };
-    } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, message: error.message };
+  handleAssignTicket: async (ticketId, agent) => {
+  const { tickets } = get();
+  set({ loading: true, error: null });
+
+  try {
+    const currentTicket = tickets.find(ticket => ticket.id === ticketId);
+    if (!currentTicket) {
+      throw new Error("Ticket not found");
     }
-  },
+
+    const updatedTicketDto = {
+      ...currentTicket,
+      assignedAgent: {
+        id: agent.id,
+        username: agent.username,
+        email: agent.email
+      },
+      status: "pending" 
+    };
+
+    try {
+      const res = await updateTicket(ticketId, updatedTicketDto);
+      console.log("Ticket update response:", res);
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+      throw error;
+    }
+
+    const updatedTickets = tickets.map(ticket =>
+      ticket.id === ticketId
+        ? updatedTicketDto
+        : ticket
+    );
+
+    set({ tickets: updatedTickets, loading: false });
+    return { success: true, message: `Ticket assigned to ${agent.username}` };
+  } catch (error) {
+    set({ error: error.message, loading: false });
+    return { success: false, message: error.message };
+  }
+},
+
 
 
 

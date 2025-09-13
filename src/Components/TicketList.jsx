@@ -103,8 +103,8 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
                     <span>{dayjs(ticket.createdAt).fromNow()}</span>
                   </div>
 
-                  {ticket.assignedTo && (
-                    <span className="font-medium text-primary">{ticket.assignedTo}</span>
+                  {ticket.assignedAgent && (
+                    <span className="font-medium text-primary">{ticket.assignedAgent.username}</span>
                   )}
                 </div>
               {/* Urgent notice */}

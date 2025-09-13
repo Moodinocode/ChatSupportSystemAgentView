@@ -18,8 +18,6 @@ const TicketDashboard = ({ tickets = [] }) => {
     pending: tickets.filter(t => t.status === "pending").length,
     urgent: tickets.filter(t => t.status === "urgent").length,
     CLOSED: tickets.filter(t => t.status === "CLOSED").length,
-    unassigned: tickets.filter(t => !t.assignedTo).length,
-    myTickets: tickets.filter(t => t.assignedTo === JSON.parse(sessionStorage.getItem("user")).username).length, 
   }
 
 

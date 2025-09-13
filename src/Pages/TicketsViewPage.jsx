@@ -27,6 +27,7 @@ const TicketsViewPage = () => {
     handleTakeTicket,
     handleResolveTicket,
     handleReopenTicket,
+    handleAssignTicket
     
   } = useTicketStore();
 
@@ -90,33 +91,28 @@ const TicketsViewPage = () => {
   const onTakeTicket = async () => {
     if (selectedTicketData) {
       console.log("handling")
-      const result = await handleTakeTicket(selectedTicket);
+      const result = await handleTakeTicket(selectedTicket,"pending");
       console.log(result)
     }
   };
 
-  const onAssignTicket = () => {
-    alert("Assignment feature would open here");
+  const onAssignTicket = async (AgentName) => {
+    if (selectedTicketData) {
+      console.log("handling")
+      const result = await handleAssignTicket(selectedTicket,AgentName)
+      console.log(result)
+    }
     
   };
 
   const onResolveTicket = async () => {
     if (selectedTicketData) {
-      const result = await handleResolveTicket(selectedTicket);
-      if (result.success) {
-        alert(result.message);
-      }
+      console.log("handling")
+      const result = await handleTakeTicket(selectedTicket,"CLOSED");
+      console.log(result)
     }
   };
 
-  const onReopenTicket = async () => {
-    if (selectedTicketData) {
-      const result = await handleReopenTicket(selectedTicket);
-      if (result.success) {
-        alert(result.message);
-      }
-    }
-  };
 
 
 
@@ -203,7 +199,6 @@ const TicketsViewPage = () => {
               onTakeTicket={onTakeTicket}
               onAssignTicket={onAssignTicket}
               onResolveTicket={onResolveTicket}
-              onReopenTicket={onReopenTicket}
             />
           </>
         ) : viewMode === "chat" && !selectedTicketData ? (
