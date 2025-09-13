@@ -5,7 +5,6 @@ import Badge from "./UIHelpers/Badge.jsx";
 import { Card } from "./UIHelpers/Card.jsx";
 import { ScrollArea } from "./UIHelpers/ScrollArea.jsx";
 import { Clock, User, AlertTriangle } from "lucide-react";
-import useConversationStore from "../Stores/useConversationStore.js";
 
 dayjs.extend(relativeTime);
 
@@ -14,9 +13,9 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
   
 
   const statusConfig = {
-    open: { color: "bg-primary  text-white", label: "Open" },
+    OPEN: { color: "bg-primary  text-white", label: "Open" },
     pending: { color: "bg-warning text-warning-foreground", label: "Pending" },
-    resolved: { color: "bg-success text-success-foreground", label: "Resolved" },
+    CLOSED: { color: "bg-success text-success-foreground", label: "closed" },
     urgent: { color: "bg-error text-error-foreground", label: "Urgent" },
   };
 
@@ -62,7 +61,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
       
             <div className="flex items-start justify-between mb-2">
               {(() => {
-                const safeStatus = statusConfig[ticket.status.name] || statusConfig["pending"];
+                const safeStatus = statusConfig[ticket.status] || statusConfig["pending"];
                 
 
                 return (

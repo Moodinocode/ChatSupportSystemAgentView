@@ -17,7 +17,7 @@ import {
 const statusConfig = {
   open: { color: "bg-primary text-primary-foreground", label: "Open" },
   pending: { color: "bg-warning text-warning-foreground", label: "Pending" },
-  resolved: { color: "bg-success text-success-foreground", label: "Resolved" },
+  closed: { color: "bg-success text-success-foreground", label: "closed" },
   urgent: { color: "bg-urgent text-urgent-foreground", label: "Urgent" }
 };
 

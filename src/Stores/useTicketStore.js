@@ -9,22 +9,22 @@ const useTicketStore = create((set, get) => ({
   currentAgent: "Agent1", 
 
   
-  // fetchTickets: async () => {
-  //   set({ loading: true, error: null });
-  //   try {
-  //   getTickets().then(response => {
-  //     console.log("API response:", response);
-  //     set({ tickets: response.data, loading: false });
-  //     });
-  //   } catch (error) {
-  //     set({ error: error.message, loading: false });
-  //   }
-  // },
   fetchTickets: async () => {
-
-      set({ tickets: mockTickets });
-    
+    set({ loading: true, error: null });
+    try {
+    getTickets().then(response => {
+      console.log("API response:", response);
+      set({ tickets: response.data, loading: false });
+      });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+    }
   },
+  // fetchTickets: async () => {
+
+  //     set({ tickets: mockTickets });
+    
+  // },
 
   // Get a specific ticket by ID
   getTicketById: (ticketId) => {
@@ -143,7 +143,7 @@ getTicketStats: () => {
     open: safeTickets.filter(t => t.status === "open").length,
     pending: safeTickets.filter(t => t.status === "pending").length,
     urgent: safeTickets.filter(t => t.status === "urgent").length,
-    resolved: safeTickets.filter(t => t.status === "resolved").length,
+    closed: safeTickets.filter(t => t.status === "resolved").length,
     unassigned: safeTickets.filter(t => !t.assignedTo).length,
     myTickets: safeTickets.filter(t => t.assignedTo === currentAgent).length,
   };
@@ -153,7 +153,7 @@ getTicketStats: () => {
   getRecentActivity: (limit = 5) => {
     const { tickets } = get();
     return tickets
-      .filter(t => t.status !== "resolved")
+      .filter(t => t.status !== "closed")
       .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
       .slice(0, limit);
   },

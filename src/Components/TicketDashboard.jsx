@@ -13,7 +13,7 @@ dayjs.extend(relativeTime);
 const TicketDashboard = ({ tickets = [], stats = {} }) => {
 
  const recentActivity = tickets
-    .filter(t => t.status !== "resolved")
+    .filter(t => t.status !== "closed")
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, 5);
 
@@ -21,7 +21,7 @@ const TicketDashboard = ({ tickets = [], stats = {} }) => {
 
   return (
     <div className="flex-1 p-6 bg-background">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto"> 
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground mb-2">Support Dashboard</h1>
           {/* <p className="text-muted-foreground">Overview of ticket queue and activity</p> */}
@@ -78,7 +78,7 @@ const TicketDashboard = ({ tickets = [], stats = {} }) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {["open", "pending", "urgent", "resolved"].map((status) => {
+                {["open", "pending", "urgent", "closed"].map((status) => {
                   const count = stats[status];
                   const bgColor =
                     status === "open"
