@@ -97,7 +97,7 @@ handleTakeTicket: async (ticketId,newstatus) => {
         username: agent.username,
         email: agent.email
       },
-      status: "pending" 
+      status: "PENDING" 
     };
 
     try {

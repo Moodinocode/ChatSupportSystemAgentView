@@ -7,7 +7,7 @@ export const getTickets = async () => axiosInstance.get(`${suburl}`);
 
 export const getTicketById = async (ticketId) => axiosInstance.get(`${suburl}/${ticketId}`);
 
-export const updateTicket = async (ticketId, ticket) => axiosInstance.put(`${suburl}/${ticketId}`,{ticket} );
+export const updateTicket = async (ticketId, ticket) => axiosInstance.put(`${suburl}/${ticketId}`,ticket );
 
 export const getTicketByCustomerId = async (customerId) => axiosInstance.get(`${suburl}/customer/${customerId}`);
 

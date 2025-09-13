@@ -14,8 +14,6 @@ function App() {
         <Route path="register" element={<RegistrationPage/>} />
         
         
-
-        {/* Protected section */}
         <Route element={<ProtectedRoute />}>
           <Route index element={<TicketsViewPage/>} />
         </Route>

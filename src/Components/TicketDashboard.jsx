@@ -15,7 +15,7 @@ const TicketDashboard = ({ tickets = [] }) => {
   const stats = {
     total: tickets.length,
     OPEN: tickets.filter(t => t.status === "OPEN").length,
-    pending: tickets.filter(t => t.status === "pending").length,
+    PENDING: tickets.filter(t => t.status === "PENDING").length,
     urgent: tickets.filter(t => t.status === "urgent").length,
     CLOSED: tickets.filter(t => t.status === "CLOSED").length,
   }
@@ -87,12 +87,12 @@ const TicketDashboard = ({ tickets = [] }) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {["OPEN", "pending", "urgent", "CLOSED"].map((status) => {
+                {["OPEN", "PENDING", "urgent", "CLOSED"].map((status) => {
                   const count = stats[status];
                   const bgColor =
                     status === "OPEN"
                       ? "bg-primary"
-                      : status === "pending"
+                      : status === "PENDING"
                       ? "bg-warning"
                       : status === "urgent"
                       ? "bg-urgent"

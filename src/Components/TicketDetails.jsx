@@ -16,7 +16,7 @@ import {
 
 const statusConfig = {
   OPEN: { color: "bg-primary text-primary-foreground", label: "Open" },
-  pending: { color: "bg-warning text-warning-foreground", label: "Pending" },
+  PENDING: { color: "bg-warning text-warning-foreground", label: "Pending" },
   CLOSED: { color: "bg-success text-success-foreground", label: "CLOSED" },
   urgent: { color: "bg-urgent text-urgent-foreground", label: "Urgent" }
 };
@@ -55,7 +55,7 @@ const TicketDetails = ({
               </button>
             )}
             
-            {(ticket.status === "pending" && ticket.assignedAgent.username === user.username)  && (
+            {(ticket.status === "PENDING" && ticket.assignedAgent.id === user.id)  && (
              
              <>
               
@@ -89,7 +89,7 @@ const TicketDetails = ({
           <div className="flex items-center justify-between">
             {(() => {
               // Safely resolve status and priority
-              const safeStatus = statusConfig[ticket.status] || statusConfig["pending"];
+              const safeStatus = statusConfig[ticket.status] || statusConfig["PENDING"];
               
 
               return (

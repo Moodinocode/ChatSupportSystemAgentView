@@ -14,7 +14,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
 
   const statusConfig = {
     OPEN: { color: "bg-primary  text-white", label: "Open" },
-    pending: { color: "bg-warning text-warning-foreground", label: "Pending" },
+    PENDING: { color: "bg-warning text-warning-foreground", label: "Pending" },
     CLOSED: { color: "bg-success text-success-foreground", label: "closed" },
     urgent: { color: "bg-error text-error-foreground", label: "Urgent" },
   };
@@ -29,7 +29,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold text-gray-800 mb-3">Ticket Queue</h2>
         <div className="flex gap-2 flex-wrap">
-          {["all", "open", "pending", "urgent"].map(status => (
+          {["all", "OPEN", "PENDING", "urgent"].map(status => (
             <button
               key={status}
               onClick={() => setFilter(status)}
@@ -61,7 +61,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
       
             <div className="flex items-start justify-between mb-2">
               {(() => {
-                const safeStatus = statusConfig[ticket.status] || statusConfig["pending"];
+                const safeStatus = statusConfig[ticket.status] || statusConfig["PENDING"];
                 
 
                 return (
