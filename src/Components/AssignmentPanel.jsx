@@ -15,7 +15,7 @@ const AssignmentPanel = ({ tickets, onAssignTickets }) => {
   const [selectedTickets, setSelectedTickets] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState("");
 
-  const unassignedTickets = tickets.filter(t => !t.assignedTo && t.status !== "closed");
+  const unassignedTickets = tickets.filter(t => !t.assignedAgent && t.status !== "closed");
   const urgentTickets = unassignedTickets.filter(t => t.status === "urgent");
 
   const handleTicketSelection = (ticketId, checked) => {

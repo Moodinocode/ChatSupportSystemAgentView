@@ -55,7 +55,7 @@ const TicketDetails = ({
               </button>
             )}
             
-            {(ticket.status === "pending" && ticket.assignedTo === user.username)  && (
+            {(ticket.status === "pending" && ticket.assignedAgent === user.username)  && (
               <>
                 <button 
                   onClick={onAssignTicket}
@@ -114,12 +114,12 @@ const TicketDetails = ({
               </div>
             </div>
             
-            {ticket.assignedTo && (
+            {ticket.assignedAgent && (
               <div className="flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Assigned to</p>
-                  <p className="text-xs text-primary font-medium">{ticket.assignedTo}</p>
+                  <p className="text-xs text-primary font-medium">{ticket.assignedAgent}</p>
                 </div>
               </div>
             )}

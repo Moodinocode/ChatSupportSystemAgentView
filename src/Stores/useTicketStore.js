@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { takeTicket, getTickets } from "../Services/ticketService";
+import { updateTicket, getTickets } from "../Services/ticketService";
 import { useAuth } from "../Context/AuthContext";
 
 const useTicketStore = create((set, get) => ({
@@ -21,13 +21,7 @@ const useTicketStore = create((set, get) => ({
       set({ error: error.message, loading: false });
     }
   },
-  // fetchTickets: async () => {
 
-  //     set({ tickets: mockTickets });
-    
-  // },
-
-  // Get a specific ticket by ID
   getTicketById: (ticketId) => {
     const { tickets } = get();
     return tickets.find(ticket => ticket.id === ticketId);
@@ -38,28 +32,52 @@ const useTicketStore = create((set, get) => ({
     set({ selectedTicket: ticketId });
   },
 
-  // Take a ticket (assign to current agent)
-  handleTakeTicket: async (ticketId) => {
-    const {  tickets } = get();
-    set({ loading: true, error: null });
+handleTakeTicket: async (ticketId) => {
+  const { tickets } = get();
+  set({ loading: true, error: null });
+  
+  try {
+    const currentTicket = tickets.find(ticket => ticket.id === ticketId);
+    if (!currentTicket) {
+      throw new Error("Ticket not found");
+    }
+
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    
+
+    const updatedTicketDto = {
+      ...currentTicket,
+      assignedAgent: {
+        id: currentUser.id,
+        username: currentUser.username,
+        email: currentUser.email
+    
+      },
+      status: "pending" 
+    };
     
     try {
-      await takeTicket(ticketId);
-      
-      // Update local state
-      const updatedTickets = tickets.map(ticket => 
-        ticket.id === ticketId 
-          ? { ...ticket, assignedTo:JSON.parse(sessionStorage.getItem("user")).username, status: "open" }
-          : ticket
-      );
-      
-      set({ tickets: updatedTickets, loading: false });
-      return { success: true, message: `You have taken ticket #${tickets.find(t => t.id === ticketId)?.number}` };
+    const res = await updateTicket(ticketId, updatedTicketDto);
+    console.log("Ticket update response:", res);
     } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, message: error.message };
+      console.error("Error updating ticket:", error);
+      throw error;
     }
-  },
+    
+
+    const updatedTickets = tickets.map(ticket => 
+      ticket.id === ticketId 
+        ? updatedTicketDto
+        : ticket
+    );
+    
+    set({ tickets: updatedTickets, loading: false });
+    return { success: true, message: `You have taken ticket #${currentTicket.number || ticketId}` };
+  } catch (error) {
+    set({ error: error.message, loading: false });
+    return { success: false, message: error.message };
+  }
+},
 
 
   // Assign ticket to specific agent
@@ -70,10 +88,11 @@ const useTicketStore = create((set, get) => ({
     try {
       await assignTicket(ticketId, agentId);
       
+      
       // Update local state
       const updatedTickets = tickets.map(ticket => 
         ticket.id === ticketId 
-          ? { ...ticket, assignedTo: agentId }
+          ? { ...ticket, assignedAgent: agentId }
           : ticket
       );
       

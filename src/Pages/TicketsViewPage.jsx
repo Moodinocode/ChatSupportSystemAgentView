@@ -53,7 +53,7 @@ const TicketsViewPage = () => {
       //get ticket with conversation id same as active conversation by id
       //check if assigned to self
       //if not then leave()
-      if (currentTicket && currentTicket.assignedTo !== user.username) {
+      if (currentTicket && currentTicket.assignedAgent !== user.username) {
         try {
           const conv = await client.getConversationBySid(activeConversation.sid);
           await conv.leave();
@@ -89,10 +89,9 @@ const TicketsViewPage = () => {
 
   const onTakeTicket = async () => {
     if (selectedTicketData) {
+      console.log("handling")
       const result = await handleTakeTicket(selectedTicket);
-      if (result.success) {
-        alert(result.message);
-      }
+      console.log(result)
     }
   };
 
