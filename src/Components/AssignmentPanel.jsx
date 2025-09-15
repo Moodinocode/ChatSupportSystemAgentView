@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./UIHelpers/Card";
 import Badge from "./UIHelpers/Badge";
 import { ScrollArea } from "./UIHelpers/ScrollArea";
-import {mockAgents} from "../assets/mockdata";
+import { getAgents } from "../Services/agentService";
 import { 
   Users, 
   UserCheck,  
@@ -10,8 +10,12 @@ import {
   CheckSquare,
   User
 } from "lucide-react";
+import useTicketStore from "../Stores/useTicketStore";
 
-const AssignmentPanel = ({ tickets, onAssignTickets }) => {
+const AssignmentPanel = () => {
+  const {tickets} = useTicketStore()
+  const agents = getAgents()
+  
   const [selectedTickets, setSelectedTickets] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState("");
 
@@ -183,7 +187,7 @@ const AssignmentPanel = ({ tickets, onAssignTickets }) => {
                     onChange={(e) => setSelectedAgent(e.target.value)}
                   >
                     <option value="">Select an agent</option>
-                    {mockAgents.map((agent) => (
+                    {agents.map((agent) => (
                       <option key={agent.id} value={agent.id}>
                         {agent.name} - {agent.status} ({agent.activeTickets}/{agent.maxCapacity})
                       </option>
@@ -205,7 +209,7 @@ const AssignmentPanel = ({ tickets, onAssignTickets }) => {
                 {/* Agent Details */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Agent Status</h4>
-                  {mockAgents.map((agent) => (
+                  {agents.map((agent) => (
                     <div key={agent.id} className="flex items-center justify-between p-2 bg-base-200 rounded-md">
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-base-content/70" />

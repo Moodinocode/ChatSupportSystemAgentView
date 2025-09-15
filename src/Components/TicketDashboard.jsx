@@ -1,8 +1,6 @@
-import React from "react";
 import Badge from "./UIHelpers/Badge.jsx";
 import { Card, CardHeader, CardContent, CardTitle } from "./UIHelpers/Card.jsx";
 import { Users, CheckCircle, AlertTriangle, TrendingUp, UserCheck } from "lucide-react";
-import useTicketStore from '../Stores/useTicketStore';
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";

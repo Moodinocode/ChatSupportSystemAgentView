@@ -187,10 +187,7 @@ const TicketsViewPage = () => {
         )}
 
         {viewMode === "assignment" && (
-          <AssignmentPanel 
-            tickets={tickets}
-            onAssignTickets={handleAssignTickets}
-          />
+          <AssignmentPanel />
         )}
 
         {viewMode === "chat" && selectedTicketData ? (
