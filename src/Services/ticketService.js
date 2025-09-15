@@ -1,5 +1,4 @@
 import axiosInstance from "../Utils/axiosInstance";
-import { mockTickets } from "../assets/mockdata";
 
 const suburl = "/ticket";
 

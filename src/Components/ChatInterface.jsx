@@ -6,7 +6,7 @@ import useConversationStore from "../Stores/useConversationStore";
 
 const ChatInterface = ({ ticket}) => {
   const [newMessage, setNewMessage] = useState("");
-  const { conversations, activeConversation, setActiveConversation, sendMessage } = useConversationStore();
+  const { conversations, activeConversation, setActiveConversation,loading, sendMessage } = useConversationStore();
 
 useEffect(() => {
   if (ticket?.conversationSid) {
@@ -34,6 +34,7 @@ const handleSend = async () => {
     }
   }
 };
+
 
 
   const handleKeyPress = (e) => {
@@ -68,6 +69,14 @@ const handleSend = async () => {
       </div>
 
       {/* Messages Area */}
+      {loading?  (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg"></div>
+          <p className="mt-2 text-gray-600">Loading conversation...</p>
+        </div>
+      </div>
+    ):
 <ScrollArea className="flex-1 p-4">
   <div className="space-y-4">
     {activeConversation?.messages?.map((message) => (
@@ -84,6 +93,7 @@ const handleSend = async () => {
     ))}
   </div>
 </ScrollArea>
+}
 
 
       {/* Message Input */}

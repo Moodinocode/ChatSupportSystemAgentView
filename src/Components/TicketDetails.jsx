@@ -1,4 +1,5 @@
 import { useAuth } from '../Context/AuthContext.jsx';
+import useTicketStore from '../Stores/useTicketStore.js';
 import  Badge  from './UIHelpers/Badge.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from "./UIHelpers/Card.jsx";
 import { Separator } from "./UIHelpers/Seperator.jsx";
@@ -32,11 +33,22 @@ const TicketDetails = ({
     if (!ticket) return <div> </div>
 
   const {user} = useAuth();
+  const {loading}= useTicketStore()
   console.log(ticket)
+  
 
   return (
     <div className="w-80 border-l bg-card h-full overflow-y-auto">
       <div className="p-4">
+        {loading?  (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg"></div>
+          <p className="mt-2 text-gray-600">Loading ticket Details...</p>
+        </div>
+      </div>
+    ):(
+      <>
         <h3 className="font-semibold text-foreground mb-4">Ticket Details</h3>
         
         {/* Ticket Actions */}
@@ -55,7 +67,7 @@ const TicketDetails = ({
               </button>
             )}
             
-            {(ticket.status === "PENDING" && ticket.assignedAgent.id === user.id)  && (
+            {ticket.status === "PENDING"  && (
              
              <>
               
@@ -176,6 +188,8 @@ const TicketDetails = ({
             )}
           </CardContent>
         </Card>
+        </>
+    )}
       </div>
     </div>
   );

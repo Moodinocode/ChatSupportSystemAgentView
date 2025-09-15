@@ -8,6 +8,7 @@ import { LayoutDashboard, Users, MessageSquare } from "lucide-react";
 import useTicketStore from '../Stores/useTicketStore';
 import useConversationStore from '../Stores/useConversationStore';
 import { useAuth } from '../Context/AuthContext';
+import { joinTwilioConversation } from '../Services/TwilioService';
 
 
 const TicketsViewPage = () => {
@@ -21,6 +22,7 @@ const TicketsViewPage = () => {
     selectedTicket,
     currentAgent,
     loading,
+    setLoading,
     fetchTickets,
     setSelectedTicket,
     getTicketById,
@@ -46,6 +48,12 @@ const TicketsViewPage = () => {
 
 
   const handleTicketSelect = async(ticket) => {
+
+    if (!client) {
+      console.error("Twilio client not initialized");
+      return;
+    }
+
     if (activeConversation) {
       const currentTicket = tickets.find(
         (t) => t.twilioConversationSid === activeConversation.sid
@@ -54,7 +62,7 @@ const TicketsViewPage = () => {
       //get ticket with conversation id same as active conversation by id
       //check if assigned to self
       //if not then leave()
-      if (currentTicket && currentTicket.assignedAgent !== user.username) {
+      if (currentTicket && currentTicket.assignedAgent.id !== user.id) {
         try {
           const conv = await client.getConversationBySid(activeConversation.sid);
           await conv.leave();
@@ -69,22 +77,19 @@ const TicketsViewPage = () => {
     console.log("Selected ticket:", ticket);
     setSelectedTicket(ticket.id);
     console.log("Ticket's conversation SID:", ticket.twilioConversationSid);
-    
-    if (!client) {
-      console.error("Twilio client not initialized");
-      return;
-    }
+    await setLoading(true);
+    console.log(loading)
     try {
-    const conversation = await client.getConversationBySid(ticket.twilioConversationSid)
-    //await conversation.join() -- if not already a participant --> ticket not asssigned to me
-    console.log("Setting active conversation for ticket:", ticket.id, conversation);
-    await setActiveConversation({conversation});
-    setViewMode("chat");
-  } catch (error) {
-      console.error("Error fetching conversation:", error);
-      return;
+      await joinTwilioConversation(ticket.twilioConversationSid)
+      const conversation = await client.getConversationBySid(ticket.twilioConversationSid)
+      console.log("Setting active conversation for ticket:", ticket.id, conversation);
+      await setActiveConversation({conversation});
+      setViewMode("chat");
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
     }
-    
+
   };
 
 

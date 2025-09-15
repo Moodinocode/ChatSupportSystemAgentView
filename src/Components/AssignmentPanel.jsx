@@ -147,7 +147,7 @@ const AssignmentPanel = ({ tickets, onAssignTickets }) => {
                           <Badge 
                             classnames={`text-xs ${
                               ticket.status === "urgent" ? "badge-error" :
-                              ticket.status === "pending" ? "badge-warning" :
+                              ticket.status === "PENDING" ? "badge-warning" :
                               "badge-primary"
                             }`}
                             text={ticket.status}

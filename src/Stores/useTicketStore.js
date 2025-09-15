@@ -121,6 +121,11 @@ handleTakeTicket: async (ticketId,newstatus) => {
     return { success: false, message: error.message };
   }
 },
+  setLoading: (value) => {
+    console.log("setting loading to ", value);
+    set({ loading: value });
+  },
+
 
 
 

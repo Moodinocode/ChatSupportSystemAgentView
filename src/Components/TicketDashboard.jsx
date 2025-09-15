@@ -139,7 +139,7 @@ const TicketDashboard = ({ tickets = [] }) => {
                         classnames={`text-xs ${
                           ticket.status === "urgent"
                             ? "bg-urgent text-urgent-foreground"
-                            : ticket.status === "pending"
+                            : ticket.status === "PENDING"
                             ? "bg-warning text-warning-foreground"
                             : ticket.status === "CLOSED"? 
                             "bg-success text-success-foreground"
