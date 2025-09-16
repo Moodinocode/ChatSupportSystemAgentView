@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { updateTicket, getTickets } from "../Services/ticketService";
-import { useAuth } from "../Context/AuthContext";
 
 const useTicketStore = create((set, get) => ({
   tickets: [],
@@ -32,7 +31,7 @@ const useTicketStore = create((set, get) => ({
     set({ selectedTicket: ticketId });
   },
 
-handleTakeTicket: async (ticketId,newstatus) => {
+handleTakeTicket: async (ticketId, newstatus) => {
   const { tickets } = get();
   set({ loading: true, error: null });
   
@@ -44,36 +43,30 @@ handleTakeTicket: async (ticketId,newstatus) => {
 
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
     
-
     const updatedTicketDto = {
       ...currentTicket,
       assignedAgent: {
         id: currentUser.id,
         username: currentUser.username,
         email: currentUser.email
-    
       },
       status: newstatus 
     };
     
-    try {
     const res = await updateTicket(ticketId, updatedTicketDto);
     console.log("Ticket update response:", res);
-    } catch (error) {
-      console.error("Error updating ticket:", error);
-      throw error;
-    }
     
-
+    // Fix: Use === for comparison, not = for assignment
     const updatedTickets = tickets.map(ticket => 
       ticket.id === ticketId 
-        ? updatedTicketDto
+        ? res.data  // Use the response data from the server
         : ticket
     );
     
     set({ tickets: updatedTickets, loading: false });
     return { success: true, message: `You have taken ticket #${currentTicket.number || ticketId}` };
   } catch (error) {
+    console.error("Error updating ticket:", error);
     set({ error: error.message, loading: false });
     return { success: false, message: error.message };
   }

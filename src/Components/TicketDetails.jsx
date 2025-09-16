@@ -24,17 +24,21 @@ const statusConfig = {
 
 
 const TicketDetails = ({ 
-    ticket, 
-    currentAgent,
+    ticketId, 
     onTakeTicket, 
     onAssignTicket, 
     onResolveTicket,
   }) => {
-    if (!ticket) return <div> </div>
+    const {loading, tickets} = useTicketStore()
 
-  const {user} = useAuth();
-  const {loading}= useTicketStore()
-  console.log(ticket)
+
+    const ticket = tickets.find(t => t.id === ticketId);
+
+  if (!ticket) return <div>Loading ticket...</div>;
+
+
+  console.log("ticket deatils "+JSON.stringify(ticket))
+  console.log("ticket stat "+JSON.stringify(ticket.status))
   
 
   return (
@@ -172,7 +176,7 @@ const TicketDetails = ({
               </div>
             </div>
             
-            {ticket.status === "urgent" && (
+            {/* {ticket.status === "urgent" && (
               <>
                 <Separator />
                 <div className="flex items-center gap-2 p-2 bg-urgent/10 rounded-md">
@@ -185,7 +189,7 @@ const TicketDetails = ({
                   </div>
                 </div>
               </>
-            )}
+            )} */}
           </CardContent>
         </Card>
         </>

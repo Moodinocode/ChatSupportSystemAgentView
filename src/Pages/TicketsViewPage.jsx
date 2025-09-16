@@ -196,8 +196,8 @@ const TicketsViewPage = () => {
   ticket={selectedTicketData}
 />
             <TicketDetails 
-              ticket={selectedTicketData}
-              currentAgent={currentAgent}
+              ticketId={selectedTicketData.id}
+
               onTakeTicket={onTakeTicket}
               onAssignTicket={onAssignTicket}
               onResolveTicket={onResolveTicket}
