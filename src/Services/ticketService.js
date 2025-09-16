@@ -14,3 +14,4 @@ export const getTicketByAgentId = async (agentId) => axiosInstance.get(`${suburl
 
 export const getTicketByStatus = async (status) => axiosInstance.get(`${suburl}/status/${status}`);
 
+export const bulkAssignTickets = async (tickets, agent) => axiosInstance.put(`${suburl}/bulkassign`, {tickets,agent})

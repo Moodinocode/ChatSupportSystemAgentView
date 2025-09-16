@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./UIHelpers/Card";
 import Badge from "./UIHelpers/Badge";
 import { ScrollArea } from "./UIHelpers/ScrollArea";
+import { bulkAssignTickets } from "../Services/ticketService";
 import { getAgents } from "../Services/agentService";
 import { 
   Users, 
@@ -14,7 +15,11 @@ import useTicketStore from "../Stores/useTicketStore";
 
 const AssignmentPanel = () => {
   const {tickets} = useTicketStore()
-  const agents = getAgents()
+  const[agents,setAgents] = useState([])
+
+  useEffect(()=>{
+    getAgents().then(res => setAgents(res)).catch(err => console.error(err));
+  },[agents])
   
   const [selectedTickets, setSelectedTickets] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState("");
@@ -40,7 +45,7 @@ const AssignmentPanel = () => {
 
   const handleAssignment = () => {
     if (selectedTickets.length > 0 && selectedAgent) {
-      onAssignTickets(selectedTickets, selectedAgent);
+      bulkAssignTickets(selectedTickets, selectedAgent);
       setSelectedTickets([]);
       setSelectedAgent("");
     }
@@ -67,7 +72,6 @@ const AssignmentPanel = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-base-content mb-2">Ticket Assignment</h1>
-          <p className="text-base-content/70">Manage and distribute tickets to your team</p>
         </div>
 
         {/* Quick Stats */}
@@ -112,7 +116,7 @@ const AssignmentPanel = () => {
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Ticket Selection */}
           <Card>
-            <CardHeader>
+            <div className="p-4">
               <div className="flex items-center justify-between">
                 <CardTitle>Unassigned Tickets</CardTitle>
                 <div className="flex items-center gap-2">
@@ -125,7 +129,7 @@ const AssignmentPanel = () => {
                   <span className="text-sm text-base-content/70">Select All</span>
                 </div>
               </div>
-            </CardHeader>
+            </div>
             <CardContent>
               <ScrollArea className="h-96">
                 <div className="space-y-2">
@@ -208,7 +212,8 @@ const AssignmentPanel = () => {
 
                 {/* Agent Details */}
                 <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Agent Status</h4>
+                  {/* This can be made a modal so that it would look better */}
+                  <h4 className="text-sm font-medium">Agent Status</h4> 
                   {agents.map((agent) => (
                     <div key={agent.id} className="flex items-center justify-between p-2 bg-base-200 rounded-md">
                       <div className="flex items-center gap-2">
