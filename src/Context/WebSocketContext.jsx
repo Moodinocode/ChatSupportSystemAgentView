@@ -1,7 +1,7 @@
 import { createContext, useContext, useRef, useState, useEffect } from 'react';
 import { Client } from '@stomp/stompjs';
 import useTicketStore from '../Stores/useTicketStore';
-import { AuthContext } from './AuthContext';
+
 
 const WebSocketContext = createContext();
 
@@ -9,11 +9,10 @@ export const WebSocketProvider = ({ children }) => {
   const clientRef = useRef(null);
   const [connected, setConnected] = useState(false);
   const { addTicket } = useTicketStore();
-  const { user } = useContext(AuthContext);//if we need it 
 
   useEffect(() => {
     const client = new Client({
-      brokerURL: `${import.meta.env.VITE_API_SOCKURL}?token=${sessionStorage.getItem("token")}`,
+      brokerURL: import.meta.env.VITE_API_SOCKURL+'?token='+ sessionStorage.getItem("token"),
       reconnectDelay: 5000,
       connectHeaders: {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
