@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
+import { WebSocketProvider } from "../Context/WebSocketContext";
 
 const ProtectedRoute = () => {
   const { user, loading } = useAuth();
@@ -7,7 +8,7 @@ const ProtectedRoute = () => {
 
   if (loading) return <div></div>; 
 
-  return user ? <Outlet /> : <Navigate to="/login" replace />;
+  return user ? <WebSocketProvider><Outlet /></WebSocketProvider> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;
