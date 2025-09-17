@@ -166,7 +166,7 @@ const AssignmentPanel = () => {
                         </div>
                         <p className="text-sm font-medium truncate">{ticket.subject}</p>
                         <p className="text-xs text-base-content/70">
-                          {ticket.customer.name} • {ticket.timestamp}
+                          {ticket.customer.username} • {ticket.timestamp}
                         </p>
                       </div>
                     </div>
@@ -193,7 +193,7 @@ const AssignmentPanel = () => {
                     <option value="">Select an agent</option>
                     {agents.map((agent) => (
                       <option key={agent.id} value={agent.id}>
-                        {agent.name} - {agent.status} ({agent.activeTickets}/{agent.maxCapacity})
+                        {agent.username} - {agent.status} ({agent.activeTickets}/{agent.maxCapacity})
                       </option>
                     ))}
                   </select>
@@ -219,7 +219,7 @@ const AssignmentPanel = () => {
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-base-content/70" />
                         <div>
-                          <p className="text-sm font-medium">{agent.name}</p>
+                          <p className="text-sm font-medium">{agent.username}</p>
                           <div className="flex items-center gap-2">
                             <Badge 
                               classnames={`text-xs ${getAgentStatusColor(agent.status)}`}

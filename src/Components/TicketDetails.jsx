@@ -3,16 +3,15 @@ import useTicketStore from '../Stores/useTicketStore.js';
 import  Badge  from './UIHelpers/Badge.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from "./UIHelpers/Card.jsx";
 import { Separator } from "./UIHelpers/Seperator.jsx";
+import { hasDisplayableMetadata } from '../Utils/metaDataFormatting.js';
 import { 
   User, 
   Mail, 
   Clock, 
   Tag, 
-  AlertTriangle, 
   UserCheck, 
   UserX,
   CheckCircle,
-  RotateCcw
 } from "lucide-react";
 
 const statusConfig = {
@@ -30,7 +29,7 @@ const TicketDetails = ({
     onResolveTicket,
   }) => {
     const {loading, tickets} = useTicketStore()
-
+    // if (!ticket) return <div> </div>
 
     const ticket = tickets.find(t => t.id === ticketId);
 
@@ -39,6 +38,9 @@ const TicketDetails = ({
 
   console.log("ticket deatils "+JSON.stringify(ticket))
   console.log("ticket stat "+JSON.stringify(ticket.status))
+
+   const customerMetadata = ticket.customer?.metadata;
+  const shouldShowMetadata = hasDisplayableMetadata(customerMetadata);
   
 
   return (
@@ -153,7 +155,7 @@ const TicketDetails = ({
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">{ticket.customer.name}</p>
+                <p className="text-sm font-medium">{ticket.customer.username}</p>
                 <p className="text-xs text-muted-foreground">Customer</p>
               </div>
             </div>
@@ -192,6 +194,32 @@ const TicketDetails = ({
             )} */}
           </CardContent>
         </Card>
+           {/* Customer Metadata */}
+        {shouldShowMetadata && (
+          <Card className="mb-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Info className="w-4 h-4" />
+                Customer Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {sortMetadataEntries(Object.entries(customerMetadata)).map(([key, value], index) => (
+                <div key={key}>
+                  {index > 0 && <Separator className="my-2" />}
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {formatMetadataKey(key)}
+                    </p>
+                    <div className="text-sm">
+                      <MetadataValue value={value} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
         </>
     )}
       </div>
