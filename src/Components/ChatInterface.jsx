@@ -55,7 +55,7 @@ const handleSend = async () => {
                 Ticket #{ticket.number}
               </h3>
               <span className="text-sm text-base-content/70">
-                with {ticket.customer.name}
+                with {ticket.customer.username}
               </span>
             </div>
             <p className="text-sm text-base-content/70 mt-1">
