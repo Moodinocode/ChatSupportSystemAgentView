@@ -42,8 +42,9 @@ const TicketsViewPage = () => {
   useEffect(() => {
     fetchTickets().then(() => {
       console.log("Fetched tickets:", tickets)
-      });
+     
       initClient()
+       });
   }, [fetchTickets]);
 
 

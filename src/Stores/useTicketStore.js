@@ -1,22 +1,69 @@
 import { create } from "zustand";
-import { updateTicket, getTickets } from "../Services/ticketService";
+import { updateTicket, getTicketsForAgent } from "../Services/ticketService";
 
 const useTicketStore = create((set, get) => ({
   tickets: [],
   selectedTicket: null,
   loading: false,
   error: null,
+  
+  lastPageLoaded:0,
+  isLastPage: false,
+
+
+  fetchMoreTickets: async () => {
+    console.log("fetching more")
+    if (get().isLastPage) return;
+    set({ loading: true, error: null });
+    try {
+    // getTickets().then(response => {
+      console.log("test");
+      console.log(sessionStorage.getItem("user"))
+      getTicketsForAgent(JSON.parse(sessionStorage.getItem("user")).id, get().lastPageLoaded+1).then(response => {
+      console.log("API response:", response);
+      const newTickets = response.data.content;
+      const page = response.data.pageable.pageNumber;
+      const last = response.data.last;
+      
+
+      set(state => ({
+        tickets: [...state.tickets, ...newTickets],
+        lastPageLoaded: page,
+        isLastPage: last,
+        loading: false
+      }));
+      });
+    } catch (error) {
+      console.error(error)
+      set({ error: error.message, loading: false });
+    }
+  },
 
 
   
   fetchTickets: async () => {
+    console.log("fetching")
     set({ loading: true, error: null });
     try {
-    getTickets().then(response => {
+    // getTickets().then(response => {
+    
+      console.log("test");
+      console.log(sessionStorage.getItem("user"))
+      getTicketsForAgent(JSON.parse(sessionStorage.getItem("user")).id,  get().lastPageLoaded).then(response => {
       console.log("API response:", response);
-      set({ tickets: response.data, loading: false });
+      const newTickets = response.data.content;
+      const page = response.data.pageable.pageNumber;
+      const last = response.data.last;
+
+      set(state => ({
+        tickets: [...state.tickets, ...newTickets],
+        lastPageLoaded: page,
+        isLastPage: last,
+        loading: false
+      }));
       });
     } catch (error) {
+      console.error(error)
       set({ error: error.message, loading: false });
     }
   },
