@@ -133,7 +133,7 @@ const TicketDashboard = ({ tickets = [] }) => {
                     <div className="flex flex-col items-center justify-between w-36">
                     <div className="flex items-center gap-2">
                       <Badge
-                        text={ticket.status.name}
+                        text={ticket.status}
                         classnames={`text-xs ${
                           ticket.status === "urgent"
                             ? "bg-urgent text-urgent-foreground"

@@ -21,11 +21,24 @@ const useTicketStore = create((set, get) => ({
     }
   },
 
-  addTicket: (newTicket) => {
-    set((state) => ({
-      tickets: [...state.tickets, newTicket]
-    }));
+  onTicketRecieve: (newTicket) => {
+    set((state) => {
+      const existingTicketIndex = state.tickets.findIndex(ticket => ticket.id === newTicket.id);
+
+      if (existingTicketIndex !== -1) {
+        const updatedTickets = [...state.tickets];
+        updatedTickets[existingTicketIndex] = {
+          ...updatedTickets[existingTicketIndex],
+          ...newTicket, 
+        };
+
+        return { tickets: updatedTickets };
+      } else {
+        return { tickets: [...state.tickets, newTicket] };
+      }
+    });
   },
+
 
   getTicketById: (ticketId) => {
     const { tickets } = get();

@@ -8,7 +8,7 @@ const WebSocketContext = createContext();
 export const WebSocketProvider = ({ children }) => {
   const clientRef = useRef(null);
   const [connected, setConnected] = useState(false);
-  const { addTicket } = useTicketStore();
+  const { onTicketRecieve } = useTicketStore();
 
   useEffect(() => {
     const client = new Client({
@@ -25,7 +25,7 @@ export const WebSocketProvider = ({ children }) => {
         // Listen for new tickets
         client.subscribe(`/user/queue/ticket`, (message) => {
           const body = JSON.parse(message.body);
-          addTicket(body);
+          onTicketRecieve(body);
         });
       },
       onStompError: (frame) => {
@@ -40,7 +40,7 @@ export const WebSocketProvider = ({ children }) => {
       client.deactivate();
       setConnected(false);
     };
-  }, [addTicket]);
+  }, [onTicketRecieve]);
 
   const disconnect = () => {
     if (clientRef.current) {
