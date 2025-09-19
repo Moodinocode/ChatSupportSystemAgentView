@@ -102,14 +102,7 @@ const TicketsViewPage = () => {
     }
   };
 
-  const onAssignTicket = async (AgentName) => {
-    if (selectedTicketData) {
-      console.log("handling")
-      const result = await handleAssignTicket(selectedTicket,AgentName)
-      console.log(result)
-    }
-    
-  };
+
 
   const onResolveTicket = async () => {
     if (selectedTicketData) {
@@ -200,7 +193,6 @@ const TicketsViewPage = () => {
               ticketId={selectedTicketData.id}
 
               onTakeTicket={onTakeTicket}
-              onAssignTicket={onAssignTicket}
               onResolveTicket={onResolveTicket}
             />
           </>

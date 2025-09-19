@@ -3,6 +3,8 @@ import useTicketStore from '../Stores/useTicketStore.js';
 import  Badge  from './UIHelpers/Badge.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from "./UIHelpers/Card.jsx";
 import { Separator } from "./UIHelpers/Seperator.jsx";
+import ReassignModal from './UIHelpers/ReassignModal.jsx';
+import { useState } from 'react';
 import { hasDisplayableMetadata } from '../Utils/metaDataFormatting.js';
 import { 
   User, 
@@ -25,11 +27,11 @@ const statusConfig = {
 const TicketDetails = ({ 
     ticketId, 
     onTakeTicket, 
-    onAssignTicket, 
     onResolveTicket,
   }) => {
-    const {loading, tickets} = useTicketStore()
+    const {loading, tickets,handleAssignTicket} = useTicketStore()
     // if (!ticket) return <div> </div>
+    const [isReassignModalOpen,setIsReassignModalOpen] = useState(false);
 
     const ticket = tickets.find(t => t.id === ticketId);
 
@@ -78,12 +80,13 @@ const TicketDetails = ({
              <>
               
                 <button 
-                  onClick={onAssignTicket}//it should open a dropdown list of either agents or categories to reassign
+                  onClick={()=>setIsReassignModalOpen(true)}
                   className="btn btn-outline btn-sm w-full flex items-center gap-2"
                 >
                   <UserX className="w-4 h-4" />
                   Reassign
                 </button>
+                 {isReassignModalOpen && <ReassignModal  setIsModalOpen={setIsReassignModalOpen} ticketId={ticketId}/>}
                 <button 
                   onClick={onResolveTicket}
                   className="btn btn-outline btn-sm w-full flex items-center gap-2"

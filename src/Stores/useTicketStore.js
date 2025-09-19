@@ -137,10 +137,70 @@ handleTakeTicket: async (ticketId, newstatus) => {
     return { success: false, message: error.message };
   }
 },
+getTicketCategory: (ticketId) => {
+  const { tickets } = get();
+
+  // Find the ticket by its ID
+  const ticket = tickets.find(ticket => ticket.id === ticketId);
+
+  if (!ticket) {
+    console.warn(`Ticket with ID ${ticketId} not found`);
+    return null; // or throw an error depending on your needs
+  }
+
+  // Return the category or null if not set
+  return ticket.category || null;
+},
+
+
+
+handleUpdateTicketCategory: async (ticketId, newCategory) => {
+  const { tickets } = get();
+  set({ loading: true, error: null });
+
+  try {
+    console.log(newCategory)
+    const currentTicket = tickets.find(ticket => ticket.id === ticketId);
+    if (!currentTicket) {
+      throw new Error("Ticket not found");
+    }
+
+
+    const updatedTicketDto = {
+      ...currentTicket,
+      category: newCategory,
+      assignedAgent: null  
+    };
+
+   
+    const res = await updateTicket(ticketId, updatedTicketDto);
+    console.log("Ticket update response:", res);
+
+
+    const updatedTickets = tickets.map(ticket =>
+      ticket.id === ticketId
+        ? res.data 
+        : ticket
+    );
+
+    set({ tickets: updatedTickets, loading: false });
+
+    return { 
+      success: true, 
+      message: `Ticket #${currentTicket.number || ticketId} category has been updated to ${newCategory} and assigned agent cleared.` 
+    };
+  } catch (error) {
+    console.error("Error updating ticket category:", error);
+    set({ error: error.message, loading: false });
+    return { success: false, message: error.message };
+  }
+},
+
 
 
   handleAssignTicket: async (ticketId, agent) => {
   const { tickets } = get();
+  console.log("handling")
   set({ loading: true, error: null });
 
   try {
@@ -148,6 +208,8 @@ handleTakeTicket: async (ticketId, newstatus) => {
     if (!currentTicket) {
       throw new Error("Ticket not found");
     }
+      console.log("updating")
+
 
     const updatedTicketDto = {
       ...currentTicket,
@@ -159,8 +221,12 @@ handleTakeTicket: async (ticketId, newstatus) => {
       status: "PENDING" 
     };
 
+     console.log("sending")
+
     try {
+      console.log(2)
       const res = await updateTicket(ticketId, updatedTicketDto);
+      console.log(3)
       console.log("Ticket update response:", res);
     } catch (error) {
       console.error("Error updating ticket:", error);

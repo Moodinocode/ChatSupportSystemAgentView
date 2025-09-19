@@ -8,4 +8,4 @@ export const getAgents = async () => axiosInstance.get(`${suburl}`)
 // export const getAgents = async () => mockAgents;
 
 
-export const getAgentsForReassign = async (category) => axiosInstance.get(`${suburl}?cat=${category}`)
+export const getAgentsForReassign = async (tid) => axiosInstance.get(`${suburl}/${tid}`)
