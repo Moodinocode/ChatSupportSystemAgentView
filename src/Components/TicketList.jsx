@@ -126,6 +126,7 @@ function debounce(fn, delay) {
                         classnames={`text-xs ${safeStatus.color}`}
                         text={safeStatus.label}
                       />
+                      <span>{ticket.priority}</span>
                     </div>
 
                   </>

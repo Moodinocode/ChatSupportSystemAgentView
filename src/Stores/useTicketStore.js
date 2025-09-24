@@ -274,7 +274,7 @@ handleUpdateTicketCategory: async (ticketId, newCategory) => {
       const statusMessage = status === "closed" 
         ? `Ticket #${ticket?.number} has been closed`
         : `Ticket #${ticket?.number} has been ${status}`;
-      
+      console.log(status)
       set({ tickets: updatedTickets, loading: false });
       return { success: true, message: statusMessage };
     } catch (error) {
@@ -286,7 +286,7 @@ handleUpdateTicketCategory: async (ticketId, newCategory) => {
 
 
   handleResolveTicket: async (ticketId) => {
-    return get().handleUpdateTicketStatus(ticketId, "closed");
+    return get().handleUpdateTicketStatus(ticketId, "RESOLVED");
   },
 
   handleReopenTicket: async (ticketId) => {

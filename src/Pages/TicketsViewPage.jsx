@@ -107,7 +107,7 @@ const TicketsViewPage = () => {
   const onResolveTicket = async () => {
     if (selectedTicketData) {
       console.log("handling")
-      const result = await handleTakeTicket(selectedTicket,"CLOSED");
+      const result = await handleTakeTicket(selectedTicket,"RESOLVED");
       console.log(result)
     }
   };
