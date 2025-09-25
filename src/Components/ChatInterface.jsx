@@ -49,6 +49,8 @@ const ChatInterface = ({ ticket }) => {
         console.error("Error sending message:", error);
       }
     }
+        setNewMessage("");
+    setSelectedFile(null);
   };
 
   const handleKeyPress = (e) => {
@@ -102,6 +104,8 @@ const ChatInterface = ({ ticket }) => {
                 key={message.sid}
                 message={message.body}
                 media={message.media} // Pass media data
+                mediaUrl={message.mediaUrl} // Pass the temporary URL
+                loadingMedia={message.loadingMedia} // Pass loading state
                 isCurrentUser={message.author !== ticket.customer.username}
                 author={message.author}
                 timestamp={message.timestamp}

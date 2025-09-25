@@ -133,88 +133,114 @@ const useConversationStore = create((set, get) => ({
     set({ conversations: updated });
   },
 
-  // Updated appendMessage to handle media like UserView
-  appendMessage: (msg) => {
-    const { conversations, activeConversation } = get();
-    
-    const newMessage = {
-      sid: msg.sid,
-      author: msg.author,
-      body: msg.body,
-      timestamp: msg.dateCreated,
-      contentSid: msg.contentSid,
-      media: msg.media || null,
-      mediaUrl: null,
-      loadingMedia: msg.media ? true : false,
-    };
+  // Updated appendMessage to handle immediate media preview
+appendMessage: (msg) => {
+  const { conversations, activeConversation } = get();
+  
+  const newMessage = {
+    sid: msg.sid,
+    author: msg.author,
+    body: msg.body,
+    timestamp: msg.dateCreated,
+    contentSid: msg.contentSid,
+    media: msg.media || null,
+    mediaUrl: null,
+    loadingMedia: msg.media ? true : false,
+  };
 
-    const updated = conversations.map((c) => {
-      if (c.conversation.sid === msg.conversation.sid) {
-        const messageExists = c.messages.some(m => m.sid === msg.sid);
-        if (messageExists) {
-          return c; 
-        }
-        
-        return {
-          ...c,
-          messages: [...c.messages, newMessage],
-          lastActivity: Date.now(),
-          unreadCount: 
-            activeConversation && activeConversation.conversation.sid === c.conversation.sid
-              ? 0 
-              : c.unreadCount + 1,
-        };
+  const updated = conversations.map((c) => {
+    if (c.conversation.sid === msg.conversation.sid) {
+      const messageExists = c.messages.some(m => m.sid === msg.sid);
+      if (messageExists) {
+        return c; 
       }
-      return c;
-    });
-
-    // Update activeConversation if it's the same conversation
-    let updatedActiveConversation = activeConversation;
-    if (activeConversation && activeConversation.conversation.sid === msg.conversation.sid) {
-      const messageExists = activeConversation.messages.some(m => m.sid === msg.sid);
-      if (!messageExists) {
-        updatedActiveConversation = {
-          ...activeConversation,
-          messages: [...activeConversation.messages, newMessage],
-          lastActivity: Date.now(),
-        };
-      }
+      
+      return {
+        ...c,
+        messages: [...c.messages, newMessage],
+        lastActivity: Date.now(),
+        unreadCount: 
+          activeConversation && activeConversation.conversation.sid === c.conversation.sid
+            ? 0 
+            : c.unreadCount + 1,
+      };
     }
+    return c;
+  });
 
-    set({ 
-      conversations: updated, 
-      activeConversation: updatedActiveConversation
-    });
+  // Update activeConversation if it's the same conversation
+  let updatedActiveConversation = activeConversation;
+  if (activeConversation && activeConversation.conversation.sid === msg.conversation.sid) {
+    const messageExists = activeConversation.messages.some(m => m.sid === msg.sid);
+    if (!messageExists) {
+      updatedActiveConversation = {
+        ...activeConversation,
+        messages: [...activeConversation.messages, newMessage],
+        lastActivity: Date.now(),
+      };
+    }
+  }
 
-    
-    if (msg.media && msg.media.size > 0) {
-      msg.media.getContentTemporaryUrl().then((url) => {
-        const updatedConversations = get().conversations.map((c) => {
-          if (c.conversation.sid === msg.conversation.sid) {
-            return {
-              ...c,
-              messages: c.messages.map(m =>
-                m.sid === msg.sid ? { ...m, mediaUrl: url, loadingMedia: false } : m
-              ),
-            };
-          }
-          return c;
-        });
+  set({ 
+    conversations: updated, 
+    activeConversation: updatedActiveConversation
+  });
 
-        let updatedActiveConv = get().activeConversation;
-        if (updatedActiveConv && updatedActiveConv.conversation.sid === msg.conversation.sid) {
-          updatedActiveConv = {
-            ...updatedActiveConv,
-            messages: updatedActiveConv.messages.map(m =>
+  // Handle media URL fetching
+  if (msg.media && msg.media.size > 0) {
+    msg.media.getContentTemporaryUrl().then((url) => {
+      const updatedConversations = get().conversations.map((c) => {
+        if (c.conversation.sid === msg.conversation.sid) {
+          return {
+            ...c,
+            messages: c.messages.map(m =>
               m.sid === msg.sid ? { ...m, mediaUrl: url, loadingMedia: false } : m
             ),
           };
         }
-
-        set({ conversations: updatedConversations, activeConversation: updatedActiveConv });
+        return c;
       });
-    }
-  },
+
+      let updatedActiveConv = get().activeConversation;
+      if (updatedActiveConv && updatedActiveConv.conversation.sid === msg.conversation.sid) {
+        updatedActiveConv = {
+          ...updatedActiveConv,
+          messages: updatedActiveConv.messages.map(m =>
+            m.sid === msg.sid ? { ...m, mediaUrl: url, loadingMedia: false } : m
+          ),
+        };
+      }
+
+      set({ conversations: updatedConversations, activeConversation: updatedActiveConv });
+    }).catch((error) => {
+      console.error('Failed to get media URL:', error);
+      // Update loading state even on error
+      const updatedConversations = get().conversations.map((c) => {
+        if (c.conversation.sid === msg.conversation.sid) {
+          return {
+            ...c,
+            messages: c.messages.map(m =>
+              m.sid === msg.sid ? { ...m, loadingMedia: false } : m
+            ),
+          };
+        }
+        return c;
+      });
+
+      let updatedActiveConv = get().activeConversation;
+      if (updatedActiveConv && updatedActiveConv.conversation.sid === msg.conversation.sid) {
+        updatedActiveConv = {
+          ...updatedActiveConv,
+          messages: updatedActiveConv.messages.map(m =>
+            m.sid === msg.sid ? { ...m, loadingMedia: false } : m
+          ),
+        };
+      }
+
+      set({ conversations: updatedConversations, activeConversation: updatedActiveConv });
+    });
+  }
+},
 
   updateParticipants: async (sid) => {
     const { conversations, client } = get();
