@@ -1,13 +1,10 @@
+//AgentView
 import { create } from "zustand";
 import { Client } from "@twilio/conversations";
 
-
-
 const updateTypingIndicator = (participant, isTyping) => {
   console.log(`${participant.identity} ${isTyping ? 'started' : 'stopped'} typing`);
-
 };
-
 
 const useConversationStore = create((set, get) => ({
   client: null,
@@ -25,6 +22,7 @@ const useConversationStore = create((set, get) => ({
     
       const client = new Client(token);
       console.log("Twilio client initialized");
+      
       client.on("conversationLeft", (conv) => {
         const { conversations } = get();
         set({
@@ -35,18 +33,14 @@ const useConversationStore = create((set, get) => ({
       });
 
       client.on("conversationAdded", (conv) => {
-    
         get().syncConversation(conv);
       });
 
       client.on("messageAdded", (msg) => {
-    
         get().appendMessage(msg);
       });
 
-
       client.on("participantJoined", (participant) => {
-      
         get().updateParticipants(participant.conversation.sid);
       });
 
@@ -57,56 +51,66 @@ const useConversationStore = create((set, get) => ({
       set({ error: err.message, loading: false });
     }
   },
+
   setTypingStarted: (conversationSid, participant) => {
-  const { typingStatus } = get();
-  const updated = { ...typingStatus };
+    const { typingStatus } = get();
+    const updated = { ...typingStatus };
 
-  if (!updated[conversationSid]) updated[conversationSid] = {};
-  updated[conversationSid][participant.sid] = {
-    identity: participant.identity,
-    avatar: participant.attributes?.avatar || null, 
-    typing: true,
-  };
-
-  set({ typingStatus: updated });
-},
-
-setTypingEnded: (conversationSid, participant) => {
-  const { typingStatus } = get();
-  const updated = { ...typingStatus };
-
-  if (updated[conversationSid] && updated[conversationSid][participant.sid]) {
+    if (!updated[conversationSid]) updated[conversationSid] = {};
     updated[conversationSid][participant.sid] = {
-      ...updated[conversationSid][participant.sid],
-      typing: false,
+      identity: participant.identity,
+      avatar: participant.attributes?.avatar || null, 
+      typing: true,
     };
-  }
 
-  set({ typingStatus: updated });
-},
+    set({ typingStatus: updated });
+  },
+
+  setTypingEnded: (conversationSid, participant) => {
+    const { typingStatus } = get();
+    const updated = { ...typingStatus };
+
+    if (updated[conversationSid] && updated[conversationSid][participant.sid]) {
+      updated[conversationSid][participant.sid] = {
+        ...updated[conversationSid][participant.sid],
+        typing: false,
+      };
+    }
+
+    set({ typingStatus: updated });
+  },
 
   // ----------- Sync Helpers ------------
   buildConversationData: async (conv) => {
     const participants = await conv.getParticipants();
     const messagesPaginator = await conv.getMessages(20); 
-     console.log("Conversation data built:", conv);
+    console.log("Conversation data built:", conv);
+    
+    // Updated to handle media like UserView
+    const messages = await Promise.all(messagesPaginator.items.map(async (m) => ({
+      sid: m.sid,
+      author: m.author,
+      body: m.body,
+      timestamp: m.dateCreated,
+      contentSid: m.contentSid,
+      media: m.media
+        ? { 
+            url: await m.media.getContentTemporaryUrl(), 
+            contentType: m.media.contentType,
+            filename: m.media.filename
+          }
+        : null,
+    })));
+
     return {
       conversation: { sid: conv.sid, friendlyName: conv.friendlyName },
       unreadCount: await conv.getUnreadMessagesCount(),
       participants,
       lastActivity: messagesPaginator.items.length > 0
-  ? messagesPaginator.items[messagesPaginator.items.length - 1].dateCreated.getTime()
-  : 0, 
-
-      messages: messagesPaginator.items.map((m) => ({
-        sid: m.sid,
-        author: m.author,
-        body: m.body,
-        timestamp: m.dateCreated,
-      })),
+        ? messagesPaginator.items[messagesPaginator.items.length - 1].dateCreated.getTime()
+        : 0, 
+      messages,
     };
-   
-
   },
 
   syncConversation: async (conv) => {
@@ -129,7 +133,7 @@ setTypingEnded: (conversationSid, participant) => {
     set({ conversations: updated });
   },
 
-    
+  // Updated appendMessage to handle media like UserView
   appendMessage: (msg) => {
     const { conversations, activeConversation } = get();
     
@@ -138,12 +142,14 @@ setTypingEnded: (conversationSid, participant) => {
       author: msg.author,
       body: msg.body,
       timestamp: msg.dateCreated,
+      contentSid: msg.contentSid,
+      media: msg.media || null,
+      mediaUrl: null,
+      loadingMedia: msg.media ? true : false,
     };
 
-   
     const updated = conversations.map((c) => {
       if (c.conversation.sid === msg.conversation.sid) {
-        
         const messageExists = c.messages.some(m => m.sid === msg.sid);
         if (messageExists) {
           return c; 
@@ -153,10 +159,10 @@ setTypingEnded: (conversationSid, participant) => {
           ...c,
           messages: [...c.messages, newMessage],
           lastActivity: Date.now(),
-           unreadCount: 
-    activeConversation && activeConversation.conversation.sid === c.conversation.sid
-      ? 0 
-      : c.unreadCount + 1,
+          unreadCount: 
+            activeConversation && activeConversation.conversation.sid === c.conversation.sid
+              ? 0 
+              : c.unreadCount + 1,
         };
       }
       return c;
@@ -179,6 +185,35 @@ setTypingEnded: (conversationSid, participant) => {
       conversations: updated, 
       activeConversation: updatedActiveConversation
     });
+
+    
+    if (msg.media && msg.media.size > 0) {
+      msg.media.getContentTemporaryUrl().then((url) => {
+        const updatedConversations = get().conversations.map((c) => {
+          if (c.conversation.sid === msg.conversation.sid) {
+            return {
+              ...c,
+              messages: c.messages.map(m =>
+                m.sid === msg.sid ? { ...m, mediaUrl: url, loadingMedia: false } : m
+              ),
+            };
+          }
+          return c;
+        });
+
+        let updatedActiveConv = get().activeConversation;
+        if (updatedActiveConv && updatedActiveConv.conversation.sid === msg.conversation.sid) {
+          updatedActiveConv = {
+            ...updatedActiveConv,
+            messages: updatedActiveConv.messages.map(m =>
+              m.sid === msg.sid ? { ...m, mediaUrl: url, loadingMedia: false } : m
+            ),
+          };
+        }
+
+        set({ conversations: updatedConversations, activeConversation: updatedActiveConv });
+      });
+    }
   },
 
   updateParticipants: async (sid) => {
@@ -212,8 +247,6 @@ setTypingEnded: (conversationSid, participant) => {
       console.error("Error fetching conversations:", error);
       set({ error: error.message, loading: false });
     }
-
-
   },
 
   setActiveConversation: async (active) => {
@@ -224,7 +257,7 @@ setTypingEnded: (conversationSid, participant) => {
         return;
       }
       console.log("Setting active conversation:", active.conversation);
-      // Fetch the conversation
+      
       const conversation = await client.getConversationBySid(active.conversation.sid);
       console.log("Active conversation fetched:", conversation);
 
@@ -241,33 +274,27 @@ setTypingEnded: (conversationSid, participant) => {
       set((state) => ({
         conversations: state.conversations.map((c) =>
           c.conversation.sid === builtconversation.conversation.sid
-            ? { ...c, ...builtconversation, lastActivity: c.lastActivity } // keep old lastActivity
+            ? { ...c, ...builtconversation, lastActivity: c.lastActivity }
             : c
         ),
       }));
 
+      // Attach typing listeners to the Twilio conversation object
+      conversation.on('typingStarted', function(participant) {
+        console.log("Typing started by:", participant.identity);
+        updateTypingIndicator(participant, true);
+      });
 
+      conversation.on('typingEnded', function(participant) {
+        updateTypingIndicator(participant, false);
+      });    
 
-    // Attach typing listeners to the Twilio conversation object
-    conversation.on('typingStarted', function(participant) {
-      console.log("Typing started by:", participant.identity);
-      updateTypingIndicator(participant, true);
-    });
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+    }
+  },
 
-    conversation.on('typingEnded', function(participant) {
-      updateTypingIndicator(participant, false);
-    });    
-
-  } catch (error) {
-    console.error("Error fetching conversation:", error);
-  }
-},
-
-//should i remove leave conversation? would the agent be automattically removed on conversation closed by the backend? 
-//If ticket is closed, agent can see previous conversations and messages? if yes then would it come from tiwlio or from mongodb
-//if from twilio then the agent would not leave the conversation --> just unable to send messages --> issue is that incase the issue is reopened
-// the agent would be still in the conversation even though another agent might handle it
-leaveConversation: async (sid) => {
+  leaveConversation: async (sid) => {
     const { client, activeConversation, conversations } = get();
     if (!client) return;
     try {
@@ -285,19 +312,51 @@ leaveConversation: async (sid) => {
     }
   },
 
-  sendMessage: async (sid, body) => {
+  // Updated sendMessage to handle files like UserView
+  sendMessage: async (sid, messageData) => {
     const { client } = get();
     if (!client) return;
+
     try {
-    const conv = await client.getConversationBySid(sid);
-    const mes = await conv.sendMessage(body);
-    console.log("Message sent:", mes);
-  } catch (error) {
-    console.error("Error sending message:", error);
-  }
+      const conv = await client.getConversationBySid(sid);
+      
+      // Handle different message types like UserView
+      if (typeof messageData === 'string') {
+        // Legacy string support
+        const mes = await conv.sendMessage(messageData);
+        console.log("Message sent:", mes);
+        return;
+      }
+
+      const { text, file } = messageData;
+
+      if (text && !file) {
+        const messageIndex = await conv.sendMessage(text);
+        console.log("Text message sent:", messageIndex);
+        return;
+      }
+
+      if (!text && file) {
+        const formData = new FormData();
+        formData.append("media", file);
+
+        const messageIndex = await conv.sendMessage(formData);
+        console.log("Media message sent:", messageIndex);
+        return;
+      }
+
+      if (text && file) {
+        const formData = new FormData();
+        formData.append("media", file);
+
+        const messageIndex = await conv.sendMessage(formData, { body: text });
+        console.log("Text + Media message sent:", messageIndex);
+        return;
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   },
-
-
 }));
 
 export default useConversationStore;

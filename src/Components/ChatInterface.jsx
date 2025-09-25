@@ -1,47 +1,65 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "./UIHelpers/ScrollArea";
 import { Send, Paperclip, MoreVertical } from "lucide-react";
 import ChatBubble from "./UIHelpers/ChatBubble";
 import useConversationStore from "../Stores/useConversationStore";
 
-const ChatInterface = ({ ticket}) => {
+const ChatInterface = ({ ticket }) => {
   const [newMessage, setNewMessage] = useState("");
-  const { conversations, activeConversation, setActiveConversation,loading, sendMessage } = useConversationStore();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const { conversations, activeConversation, setActiveConversation, loading, sendMessage } = useConversationStore();
+  const fileInputRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
-useEffect(() => {
-  if (ticket?.conversationSid) {
-    const conversationData = conversations.find(
-      c => c.conversation.sid === ticket.conversationSid
-    );
+  useEffect(() => {
+    if (ticket?.conversationSid) {
+      const conversationData = conversations.find(
+        c => c.conversation.sid === ticket.conversationSid
+      );
 
-    if (conversationData) {
-      setActiveConversation(conversationData);
-    } else {
-      // If not in local store, still set active with minimal data
-      setActiveConversation({ conversation: { sid: ticket.conversationSid }, messages: [] });
+      if (conversationData) {
+        setActiveConversation(conversationData);
+      } else {
+        // If not in local store, still set active with minimal data
+        setActiveConversation({ conversation: { sid: ticket.conversationSid }, messages: [] });
+      }
     }
-  }
-}, [ticket?.conversationSid, conversations, setActiveConversation]);
+  }, [ticket?.conversationSid, conversations, setActiveConversation]);
 
-
-const handleSend = async () => {
-  if (newMessage.trim() && activeConversation?.conversation?.sid) {
-    try {
-      await sendMessage(activeConversation.conversation.sid, newMessage);
-      setNewMessage("");
-    } catch (error) {
-      console.error("Error sending message:", error);
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (activeConversation?.messages.length) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }
-};
+  }, [activeConversation?.messages.length]);
 
+  const handleSend = async () => {
+    const trimmedMessage = newMessage.trim();
+    if (!trimmedMessage && !selectedFile) return;
 
+    if (activeConversation?.conversation?.sid) {
+      try {
+        await sendMessage(activeConversation.conversation.sid, {
+          text: trimmedMessage || null,
+          file: selectedFile || null,
+        });
+        setNewMessage("");
+        setSelectedFile(null);
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    }
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleFileSelect = (e) => {
+    setSelectedFile(e.target.files[0]);
   };
 
   return (
@@ -69,37 +87,62 @@ const handleSend = async () => {
       </div>
 
       {/* Messages Area */}
-      {loading?  (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="loading loading-spinner loading-lg"></div>
-          <p className="mt-2 text-gray-600">Loading conversation...</p>
+      {loading ? (
+        <div className="h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="loading loading-spinner loading-lg"></div>
+            <p className="mt-2 text-gray-600">Loading conversation...</p>
+          </div>
         </div>
-      </div>
-    ):
-<ScrollArea className="flex-1 p-4">
-  <div className="space-y-4">
-    {activeConversation?.messages?.map((message) => (
-      <ChatBubble
-        key={message.sid}
-        message={{
-          id: message.sid,
-          content: message.body,
-          sender: message.author,
-          timestamp: message.timestamp,
-        }}
-        isAgent={message.author !== ticket.customer.username}
-      />
-    ))}
-  </div>
-</ScrollArea>
-}
-
+      ) : (
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+            {activeConversation?.messages?.map((message) => (
+              <ChatBubble
+                key={message.sid}
+                message={message.body}
+                media={message.media} // Pass media data
+                isCurrentUser={message.author !== ticket.customer.username}
+                author={message.author}
+                timestamp={message.timestamp}
+                profileImageUrl={`https://ui-avatars.com/api/?name=${encodeURIComponent(message.author)}&background=random`}
+                showAvatar={true}
+                showFooter={false}
+              />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
+      )}
 
       {/* Message Input */}
       <div className="border-t bg-base-100 p-4">
+        {/* File preview */}
+        {selectedFile && (
+          <div className="mb-2 p-2 bg-base-200 rounded-lg text-sm">
+            <span className="text-base-content/70">Selected file: </span>
+            <span className="font-medium">{selectedFile.name}</span>
+            <button
+              onClick={() => setSelectedFile(null)}
+              className="ml-2 text-error hover:text-error-focus"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        
         <div className="flex gap-2">
-          <button className="btn btn-ghost btn-sm">
+          <input
+            type="file"
+            accept="image/*,video/*"
+            onChange={handleFileSelect}
+            className="hidden"
+            ref={fileInputRef}
+          />
+          <button 
+            className="btn btn-ghost btn-sm"
+            onClick={() => fileInputRef.current?.click()}
+          >
             <Paperclip className="w-4 h-4" />
           </button>
           <div className="flex-1 flex gap-2">
@@ -113,7 +156,7 @@ const handleSend = async () => {
             />
             <button 
               onClick={handleSend}
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() && !selectedFile}
               className="btn btn-primary px-4"
             >
               <Send className="w-4 h-4" />

@@ -7,18 +7,15 @@ const useTicketStore = create((set, get) => ({
   loading: false,
   error: null,
   
-  lastPageLoaded:0,
+  lastPageLoaded:-1,
   isLastPage: false,
 
 
-  fetchMoreTickets: async () => {
+  fetchTickets: async () => {
     console.log("fetching more")
     if (get().isLastPage) return;
     set({ loading: true, error: null });
     try {
-    // getTickets().then(response => {
-      console.log("test");
-      console.log(sessionStorage.getItem("user"))
       getTicketsForAgent(JSON.parse(sessionStorage.getItem("user")).id, get().lastPageLoaded+1).then(response => {
       console.log("API response:", response);
       const newTickets = response.data.content;
@@ -41,32 +38,28 @@ const useTicketStore = create((set, get) => ({
 
 
   
-  fetchTickets: async () => {
-    console.log("fetching")
-    set({ loading: true, error: null });
-    try {
-    // getTickets().then(response => {
-    
-      console.log("test");
-      console.log(sessionStorage.getItem("user"))
-      getTicketsForAgent(JSON.parse(sessionStorage.getItem("user")).id,  get().lastPageLoaded).then(response => {
-      console.log("API response:", response);
-      const newTickets = response.data.content;
-      const page = response.data.pageable.pageNumber;
-      const last = response.data.last;
+  // fetchTickets: async () => {
+  //   console.log("fetching")
+  //   set({ loading: true, error: null });
+  //   try {
+  //     getTicketsForAgent(JSON.parse(sessionStorage.getItem("user")).id,  get().lastPageLoaded).then(response => {
+  //     console.log("API response:", response);
+  //     const newTickets = response.data.content;
+  //     const page = response.data.pageable.pageNumber;
+  //     const last = response.data.last;
 
-      set(state => ({
-        tickets: [...state.tickets, ...newTickets],
-        lastPageLoaded: page,
-        isLastPage: last,
-        loading: false
-      }));
-      });
-    } catch (error) {
-      console.error(error)
-      set({ error: error.message, loading: false });
-    }
-  },
+  //     set(state => ({
+  //       tickets: [...state.tickets, ...newTickets],
+  //       lastPageLoaded: page,
+  //       isLastPage: last,
+  //       loading: false
+  //     }));
+  //     });
+  //   } catch (error) {
+  //     console.error(error)
+  //     set({ error: error.message, loading: false });
+  //   }
+  // },
 
   onTicketRecieve: (newTicket) => {
     set((state) => {

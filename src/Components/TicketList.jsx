@@ -12,7 +12,7 @@ dayjs.extend(relativeTime);
 export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
   const [filter, setFilter] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const {fetchMoreTickets} = useTicketStore()
+  const {fetchTickets} = useTicketStore()
   const scrollAreaRef = useRef(null);
 
   const statusConfig = {
@@ -38,7 +38,7 @@ const handleScroll = useCallback(
     if (scrollHeight - scrollTop - clientHeight < threshold && !isLoadingMore) {
       setIsLoadingMore(true);
       try {
-        await fetchMoreTickets();
+        await fetchTickets();
       } catch (error) {
         console.error('Error loading more tickets:', error);
       } finally {
@@ -46,7 +46,7 @@ const handleScroll = useCallback(
       }
     }
   }, 200), 
-  [fetchMoreTickets, isLoadingMore]
+  [fetchTickets, isLoadingMore]
 );
 
 function debounce(fn, delay) {
