@@ -64,7 +64,7 @@ const ReassignForm = ({setIsModalOpen, ticketId }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className=" modal-box p-6 rounded-2xl shadow-xl  p-4 max-w-md bg-white rounded-2xl shadow-md space-y-4">
+    <form onSubmit={handleSubmit} className=" modal-box p-6  max-w-md bg-white rounded-2xl space-y-4">
       <h2 className="text-xl font-semibold text-gray-800">Reassign Ticket</h2>
 
       {/* Agent Dropdown */}

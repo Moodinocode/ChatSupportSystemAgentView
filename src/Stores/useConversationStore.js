@@ -1,6 +1,7 @@
 //AgentView
 import { create } from "zustand";
 import { Client } from "@twilio/conversations";
+import useTicketStore from "./useTicketStore";
 
 const updateTypingIndicator = (participant, isTyping) => {
   console.log(`${participant.identity} ${isTyping ? 'started' : 'stopped'} typing`);

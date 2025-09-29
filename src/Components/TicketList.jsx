@@ -15,12 +15,14 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
   const {fetchTickets} = useTicketStore()
   const scrollAreaRef = useRef(null);
 
-  const statusConfig = {
-    OPEN: { color: "bg-primary  text-white", label: "Open" },
-    PENDING: { color: "bg-warning text-warning-foreground", label: "Pending" },
-    CLOSED: { color: "bg-success text-success-foreground", label: "closed" },
-    urgent: { color: "bg-error text-error-foreground", label: "Urgent" },
-  };
+const statusConfig = {
+  OPEN: { color: "bg-primary text-primary-foreground", label: "Open" },
+  PENDING: { color: "bg-warning text-warning-foreground", label: "Pending" },
+  CLOSED: { color: "bg-success text-success-foreground", label: "CLOSED" },
+  WAITING_CUSTOMER: { color: "bg-info text-success-foreground", label: "Waiting" },
+  RESOLVED: { color: "bg-success text-success-foreground", label: "RESOLVED" },
+  urgent: { color: "bg-urgent text-urgent-foreground", label: "Urgent" }
+};
 
     const filteredTickets = tickets?.filter(ticket => 
       filter === "all" ? true : ticket.status === filter
@@ -102,7 +104,9 @@ function debounce(fn, delay) {
    
       <ScrollArea className="flex-1" ref={scrollAreaRef}>
         <div className="p-2 space-y-2">
-          {filteredTickets.map(ticket => (
+          {filteredTickets.map(ticket => {
+          
+              return (
             <Card
               key={ticket.id}
               className={`p-3 cursor-pointer transition-all hover:shadow-md ${
@@ -127,6 +131,14 @@ function debounce(fn, delay) {
                         text={safeStatus.label}
                       />
                       <span>{ticket.priority}</span>
+                      {/* <div>
+                          {ticket.unreadCount > 0 && (
+                            <span className="bg-primary text-white text-xs rounded-full px-2 py-0.5 ml-2">
+                              {ticket.unreadCount}
+                            </span>
+                          )}
+
+                          </div> */}
                     </div>
 
                   </>
@@ -170,7 +182,8 @@ function debounce(fn, delay) {
                 </div>
               )}
             </Card>
-          ))}
+              )
+})}
            {isLoadingMore && (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="w-4 h-4 animate-spin text-gray-400 mr-2" />

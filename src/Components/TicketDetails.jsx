@@ -20,6 +20,8 @@ const statusConfig = {
   OPEN: { color: "bg-primary text-primary-foreground", label: "Open" },
   PENDING: { color: "bg-warning text-warning-foreground", label: "Pending" },
   CLOSED: { color: "bg-success text-success-foreground", label: "CLOSED" },
+  WAITING_CUSTOMER: { color: "bg-info text-success-foreground", label: "Waiting" },
+  RESOLVED: { color: "bg-success text-success-foreground", label: "RESOLVED" },
   urgent: { color: "bg-urgent text-urgent-foreground", label: "Urgent" }
 };
 

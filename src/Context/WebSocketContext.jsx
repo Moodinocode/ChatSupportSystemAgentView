@@ -24,7 +24,7 @@ export const WebSocketProvider = ({ children }) => {
 
         // Listen for new tickets
         client.subscribe(`/user/queue/ticket`, (message) => {
-          const body = JSON.parse(message.body);
+          const body = JSON.parse("socket "+message.body);
           onTicketRecieve(body);
         });
       },
