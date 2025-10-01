@@ -4,17 +4,22 @@ import ChatInterface from '../Components/ChatInterface';
 import TicketDetails from '../Components/TicketDetails';
 import TicketDashboard from '../Components/TicketDashboard';
 import AssignmentPanel from '../Components/AssignmentPanel';
-import { LayoutDashboard, Users, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Users, MessageSquare, Circle } from "lucide-react";
 import useTicketStore from '../Stores/useTicketStore';
 import useConversationStore from '../Stores/useConversationStore';
 import { useAuth } from '../Context/AuthContext';
 import { joinTwilioConversation } from '../Services/TwilioService';
+import { useNavigate } from 'react-router-dom';
+import { updateAgentStatus } from '../Services/agentService';
 
 
 const TicketsViewPage = () => {
   const [viewMode, setViewMode] = useState("dashboard");
+  const [agentStatus, setAgentStatus] = useState("online");
 
-  const {user} = useAuth()
+  const navigate = useNavigate()
+
+  const {user,logoutUser} = useAuth()
   
   // Zustand store
   const {
@@ -34,6 +39,34 @@ const TicketsViewPage = () => {
   } = useTicketStore();
 
   const { initClient, client, setActiveConversation,activeConversation } = useConversationStore();
+
+  
+  const toggleStatus = () => {
+    const statuses = ["online", "offline", "busy"];
+    const currentIndex = statuses.indexOf(agentStatus);
+    const nextIndex = (currentIndex + 1) % statuses.length;
+    //send update request
+    updateAgentStatus(user.id,statuses[nextIndex].toUpperCase())
+    setAgentStatus(statuses[nextIndex]);
+  };
+
+  const getStatusColor = () => {
+    switch(agentStatus) {
+      case "online": return "text-success";
+      case "offline": return "text-base-content/40";
+      case "busy": return "text-warning";
+      default: return "text-base-content/40";
+    }
+  };
+
+  const getStatusBtnClass = () => {
+    switch(agentStatus) {
+      case "online": return "btn-success";
+      case "offline": return "btn-ghost";
+      case "busy": return "btn-warning";
+      default: return "btn-ghost";
+    }
+  };
 
 
   const selectedTicketData = selectedTicket ? getTicketById(selectedTicket) : null;
@@ -128,9 +161,10 @@ const TicketsViewPage = () => {
   }
 
   return (
-    <div className="h-screen bg-base-100 flex">
+    <div className="h-screen bg-base-100 flex justify-between">
       {/* Navigation Header */}
       <div className="absolute top-0 left-0 right-0 z-10 bg-base-100 border-b p-2">
+        <div className='flex justify-between'>
         <div className="flex items-center gap-2">
           <button
             className={`btn btn-sm ${viewMode === "dashboard" ? "btn-primary" : "btn-ghost"}`}
@@ -161,8 +195,35 @@ const TicketsViewPage = () => {
               <span className="text-sm text-gray-600">Updating...</span>
             </div>
           )}
+          
+
         </div>
+        <div className="flex items-center gap-2">
+          {/* Status Toggle Button */}
+          <button
+            className={`btn btn-sm ${getStatusBtnClass()}`}
+            onClick={toggleStatus}
+          >
+            <Circle className={`w-3 h-3 mr-2 fill-current ${getStatusColor()}`} />
+            <span className="capitalize">{agentStatus}</span>
+          </button>
+          
+          {/* Logout Button */}
+          <button
+            className="btn btn-sm btn-error"
+            onClick={() => {
+              logoutUser();
+              navigate('/login');
+            }}
+          >
+            Logout
+          </button>
+        </div>
+        </div>
+
+
       </div>
+      
 
       <div className="flex w-full pt-14">
         {/* Ticket List - Always visible */}

@@ -3,6 +3,7 @@ import { ScrollArea } from "./UIHelpers/ScrollArea";
 import { Send, Paperclip, MoreVertical } from "lucide-react";
 import ChatBubble from "./UIHelpers/ChatBubble";
 import useConversationStore from "../Stores/useConversationStore";
+import SystemMessage from "./UIHelpers/SystemMessage";
 
 const ChatInterface = ({ ticket }) => {
   const [newMessage, setNewMessage] = useState("");
@@ -99,21 +100,28 @@ const ChatInterface = ({ ticket }) => {
       ) : (
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
-            {activeConversation?.messages?.map((message) => (
-              <ChatBubble
-                key={message.sid}
-                message={message.body}
-                media={message.media} // Pass media data
-                mediaUrl={message.mediaUrl} // Pass the temporary URL
-                loadingMedia={message.loadingMedia} // Pass loading state
-                isCurrentUser={message.author !== ticket.customer.username}
-                author={message.author}
-                timestamp={message.timestamp}
-                profileImageUrl={`https://ui-avatars.com/api/?name=${encodeURIComponent(message.author)}&background=random`}
-                showAvatar={true}
-                showFooter={false}
-              />
-            ))}
+            {activeConversation?.messages?.map((message) => 
+              message.media?.contentType?.startsWith('application/x-vnd.com.twilio.rich.twilio.text') ? (
+                <SystemMessage 
+                  key={message.sid}
+                  variables={message.body}
+                />
+              ) : (
+                <ChatBubble
+                  key={message.sid}
+                  message={message.body}
+                  media={message.media}
+                  mediaUrl={message.mediaUrl}
+                  loadingMedia={message.loadingMedia}
+                  isCurrentUser={message.author !== ticket.customer.username}
+                  author={message.author}
+                  timestamp={message.timestamp}
+                  profileImageUrl={`https://ui-avatars.com/api/?name=${encodeURIComponent(message.author)}&background=random`}
+                  showAvatar={true}
+                  showFooter={false}
+                />
+              )
+            )}
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>

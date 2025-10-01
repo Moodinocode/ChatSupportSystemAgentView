@@ -54,7 +54,7 @@ const ChatBubble = ({
         </div>
       );
     }
-
+   
     if (media.contentType?.startsWith("image/")) {
       return (
         <img 

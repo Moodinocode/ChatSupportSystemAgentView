@@ -26,27 +26,27 @@ axiosInstance.interceptors.request.use(
 );
 
 
-// axiosInstance.interceptors.response.use(
-//   (response) => {
-//     return response;
-//   },
-//   (error) => {
-//     if (error.response) {
-//       console.error('Error Response:', error.response);
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      console.error('Error Response:', error.response);
 
 
-//       if (error.response.status === 401) {
-//         sessionStorage.clear();
+      if (error.response.status === 401) {
+        sessionStorage.clear();
 
-//         window.location.href = '/login'; 
-//       }
-//     } else {
-//       console.error('Network or other error:', error.message);
+        window.location.href = '/login'; 
+      }
+    } else {
+      console.error('Network or other error:', error.message);
       
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+    }
+    return Promise.reject(error);
+  }
+);
 
 
 export default axiosInstance;

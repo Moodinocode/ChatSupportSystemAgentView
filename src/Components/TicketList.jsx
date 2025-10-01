@@ -6,6 +6,7 @@ import { Card } from "./UIHelpers/Card.jsx";
 import { ScrollArea } from "./UIHelpers/ScrollArea.jsx";
 import { Clock, User, AlertTriangle, Loader2 } from "lucide-react";
 import useTicketStore from "../Stores/useTicketStore.js";
+import useConversationStore from "../Stores/useConversationStore.js";
 
 dayjs.extend(relativeTime);
 
@@ -14,6 +15,7 @@ export function TicketList({ tickets, selectedTicket, onTicketSelect }) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const {fetchTickets} = useTicketStore()
   const scrollAreaRef = useRef(null);
+  const {conversations} = useConversationStore();
 
 const statusConfig = {
   OPEN: { color: "bg-primary text-primary-foreground", label: "Open" },
@@ -27,6 +29,10 @@ const statusConfig = {
     const filteredTickets = tickets?.filter(ticket => 
       filter === "all" ? true : ticket.status === filter
     ) || [];
+
+    useEffect(()=>{
+      
+    },[conversations])
 
 
 

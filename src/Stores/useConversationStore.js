@@ -84,7 +84,8 @@ const useConversationStore = create((set, get) => ({
   // ----------- Sync Helpers ------------
   buildConversationData: async (conv) => {
     const participants = await conv.getParticipants();
-    const messagesPaginator = await conv.getMessages(20); 
+    const messagesPaginator = await conv.getMessages(20);
+   
     console.log("Conversation data built:", conv);
     
     // Updated to handle media like UserView
@@ -102,6 +103,7 @@ const useConversationStore = create((set, get) => ({
           }
         : null,
     })));
+    console.log("messages we want", messages)
 
     return {
       conversation: { sid: conv.sid, friendlyName: conv.friendlyName },

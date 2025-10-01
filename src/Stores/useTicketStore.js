@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { updateTicket, getTicketsForAgent } from "../Services/ticketService";
+import { getAgentById } from "../Services/agentService";
 
 const useTicketStore = create((set, get) => ({
   tickets: [],
@@ -37,45 +38,33 @@ const useTicketStore = create((set, get) => ({
   },
 
 
-  
-  // fetchTickets: async () => {
-  //   console.log("fetching")
-  //   set({ loading: true, error: null });
-  //   try {
-  //     getTicketsForAgent(JSON.parse(sessionStorage.getItem("user")).id,  get().lastPageLoaded).then(response => {
-  //     console.log("API response:", response);
-  //     const newTickets = response.data.content;
-  //     const page = response.data.pageable.pageNumber;
-  //     const last = response.data.last;
-
-  //     set(state => ({
-  //       tickets: [...state.tickets, ...newTickets],
-  //       lastPageLoaded: page,
-  //       isLastPage: last,
-  //       loading: false
-  //     }));
-  //     });
-  //   } catch (error) {
-  //     console.error(error)
-  //     set({ error: error.message, loading: false });
-  //   }
-  // },
-
-  onTicketRecieve: (newTicket) => {
-    set((state) => {
-      const existingTicketIndex = state.tickets.findIndex(ticket => ticket.id === newTicket.id);
-
-      if (existingTicketIndex !== -1) {
-        const updatedTickets = [...state.tickets];
-        updatedTickets[existingTicketIndex] = {
-          ...updatedTickets[existingTicketIndex],
-          ...newTicket, 
+  onTicketReceive: async (newTicket) => {
+     const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    const agent = await getAgentById(currentUser.id);
+    set( (state) => {
+     
+      
+      console.log(agent)
+      // Drop ticket if it's assigned to another agent
+      if ((newTicket.assignedAgent && newTicket.assignedAgent.id !== currentUser.id) || (!newTicket.assignedAgent && !agent.data.categories.includes(newTicket.category))) {
+        console.log("test")
+        // If ticket exists locally, remove it
+        return {
+          tickets: state.tickets.filter(ticket => ticket.id !== newTicket.id)
         };
-
-        return { tickets: updatedTickets };
-      } else {
-        return { tickets: [...state.tickets, newTicket] };
       }
+      
+      const ticketExists = state.tickets.some(ticket => ticket.id === newTicket.id);
+      
+      return {
+        tickets: ticketExists
+          ? state.tickets.map(ticket =>
+              ticket.id === newTicket.id
+                ? { ...ticket, ...newTicket }
+                : ticket
+            )
+          : [newTicket, ...state.tickets]
+      };
     });
   },
 
@@ -111,7 +100,7 @@ handleTakeTicket: async (ticketId, newstatus) => {
       },
       status: newstatus 
     };
-    
+    console.log('updated ticket', updatedTicketDto)
     const res = await updateTicket(ticketId, updatedTicketDto);
     console.log("Ticket update response:", res);
     
@@ -162,7 +151,8 @@ handleUpdateTicketCategory: async (ticketId, newCategory) => {
     const updatedTicketDto = {
       ...currentTicket,
       category: newCategory,
-      assignedAgent: null  
+      assignedAgent: null  ,
+      status: "OPEN"
     };
 
    
@@ -170,11 +160,12 @@ handleUpdateTicketCategory: async (ticketId, newCategory) => {
     console.log("Ticket update response:", res);
 
 
-    const updatedTickets = tickets.map(ticket =>
-      ticket.id === ticketId
-        ? res.data 
-        : ticket
-    );
+    // const updatedTickets = tickets.map(ticket =>
+    //   ticket.id === ticketId
+    //     ? res.data 
+    //     : ticket
+    // );
+    const updatedTickets = tickets.filter(ticket => ticket.id !== ticketId)
 
     set({ tickets: updatedTickets, loading: false });
 
