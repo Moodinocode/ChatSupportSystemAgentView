@@ -1,12 +1,69 @@
-# React + Vite
+# Chat Support System — Agent View
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The agent-facing half of a two-sided support platform. A customer starts a conversation in the [customer app](https://github.com/Moodinocode/ChatSupportSystemUserView); it arrives here as a ticket that an agent can pick up, triage, reassign and answer.
 
-Currently, two official plugins are available:
+Both halves talk to the same backend, which is not public.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Built at Tecfrac, September–October 2025.
 
-## Expanding the ESLint configuration
+## What it does
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Ticket dashboard** — every conversation as a ticket, paginated, with status and last-message context
+- **Ticket detail** with full conversation history and the customer's metadata
+- **Reply in real time**, with the customer seeing typing indicators
+- **Assignment and reassignment** — take a ticket, or hand it to another agent through a reassignment modal
+- **Categorisation and re-categorisation**, backed by a category service
+- **Priority levels** surfaced on the ticket list
+- **Live updates over WebSockets (STOMP)** — new tickets and new messages arrive without a refresh
+- **Media display** in the conversation thread
+- **Chatbot** handling the first line before escalation
+
+## Stack
+
+| Concern | Choice |
+|---|---|
+| Framework | React + Vite |
+| State | Zustand — separate stores for conversations and tickets |
+| Realtime | STOMP over WebSockets, via a `WebSocketContext` provider |
+| Styling | Tailwind CSS + DaisyUI, with a small in-house component set |
+| Messaging | Twilio Conversations SDK |
+| Voice | Twilio Voice SDK |
+| Dates | dayjs |
+| HTTP | axios, through a shared instance handling auth and refresh |
+
+## Structure
+
+```
+src/
+├── Pages/              Login, Registration, TicketsView
+├── Components/
+│   ├── AuthComponents/     Email, password and username inputs
+│   ├── UIHelpers/          Badge, Card, ChatBubble, ScrollArea,
+│   │                       Separator, ReassignForm, ReassignModal
+│   ├── TicketDashboard.jsx
+│   ├── TicketList.jsx
+│   ├── TicketDetails.jsx
+│   ├── AssignmentPanel.jsx
+│   └── ChatInterface.jsx
+├── Context/            AuthContext, WebSocketContext
+├── Services/           agent, ticket, chat, category, user, auth, Twilio
+├── Stores/             Zustand conversation and ticket stores
+└── Utils/              axios instance, metadata formatting
+```
+
+This half is roughly twice the size of the customer app — around 3,300 lines against 1,500 — because triage is where the complexity lives: assignment, categorisation, pagination and live ticket updates have no counterpart on the customer side.
+
+## Running it
+
+```bash
+npm install
+npm run dev
+```
+
+The app expects the support backend to be reachable through the configured proxy. That backend is a private service, so this repository is not runnable end to end on its own — it is published to show the client-side architecture rather than as a deployable product.
+
+## Known debt
+
+The two halves of this system were built as separate repositories, and the code they share has drifted rather than staying in step. `AuthContext`, `ProtectedRoute`, `axiosInstance`, `authService`, the auth input components and the Zustand conversation store all exist in both repositories in slightly different versions — the conversation store alone differs by around 70 lines between them.
+
+The right structure is a single repository with `apps/customer`, `apps/agent` and a shared package holding auth, the API client and the conversation store. That consolidation has not been done; it is the first thing worth fixing if this were taken further.
